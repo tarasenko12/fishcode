@@ -1,0 +1,7 @@
+# Files and directories which Git should ignore.
+.vs
+.vscode
+build
+out
+tests
+
