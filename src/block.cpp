@@ -1,7 +1,7 @@
 /*
-** Copyright (C) 2024-2025 Vitaliy Tarasenko.
+** Copyright (C) 2025 Vitaliy Tarasenko.
 **
-** This file is part of FishCode.
+** This file is part of FishCode (fishcode).
 **
 ** FishCode is free software: you can redistribute it and/or modify it under
 ** the terms of the GNU General Public License as published by the Free
@@ -17,17 +17,40 @@
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <vector>
 #include <cstddef>
 #include <cstdint>
 #include "block.hpp"
-#include "key.hpp"
+
+using std::size_t;
+using std::uint8_t;
 
 fc::Block::Block() {
-  // Allocate memory for the vector.
-  bytes.reserve(CAPACITY);
+    // Initialize block with default values.
+    bytes = {
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0
+    };
+
+    // Configure offset.
+    offset = 0;
+
+    // Now it is empty block.
+    realSize = 0;
 }
 
+void fc::Block::Push(const uint8_t byte) {
+    // Check if block isn't full.
+    if (realSize != SIZE) {
+        // Append one byte to the end of block.
+        bytes[offset++] = byte;
+
+        // Update block real size.
+        realSize++;
+    }
+}
+// TODO
 void fc::Block::Encrypt(const fc::Key& key) noexcept {
   // Encrypt block within 15 rounds.
   for (int round = 0; round < 15; round++) {
@@ -57,7 +80,7 @@ void fc::Block::Encrypt(const fc::Key& key) noexcept {
     }
   }
 }
-
+// TODO
 void fc::Block::Decrypt(const fc::Key& key) noexcept {
   // Decrypt block within 15 rounds.
   for (int round = 14; round >= 0; round--) {

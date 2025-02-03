@@ -1,7 +1,7 @@
 /*
-** Copyright (C) 2024-2025 Vitaliy Tarasenko.
+** Copyright (C) 2025 Vitaliy Tarasenko.
 **
-** This file is part of FishCode.
+** This file is part of FishCode (fishcode).
 **
 ** FishCode is free software: you can redistribute it and/or modify it under
 ** the terms of the GNU General Public License as published by the Free
@@ -20,46 +20,46 @@
 #ifndef FISHCODE_BLOCK_HPP
 #define FISHCODE_BLOCK_HPP
 
-#include <vector>
+#include <array>
 #include <cstddef>
 #include <cstdint>
-#include "key.hpp"
 
 namespace fc {
-  class Block {
-  public:
-    static constexpr const std::size_t CAPACITY = 16;
+    class Block {
+    public:
+        static constexpr const std::size_t SIZE = 16;
 
-    Block();
-    Block(const Block& otherBlock) = default;
-    Block(Block&& otherBlock) = default;
+        Block();
+        Block(const Block& otherBlock) = default;
+        Block(Block&& otherBlock) = default;
 
-    ~Block() noexcept = default;
+        ~Block() noexcept = default;
 
-    Block& operator=(const Block& otherBlock) = default;
-    Block& operator=(Block&& otherBlock) = default;
+        Block& operator=(const Block& otherBlock) = default;
+        Block& operator=(Block&& otherBlock) = default;
 
-    inline std::vector<std::uint8_t>::const_iterator begin() const noexcept {
-      // Call corresponding std::vector method.
-      return bytes.begin();
-    }
+        inline std::uint8_t& operator[](const std::size_t index) noexcept {
+            // Call corresponding std::array overloaded operator.
+            return bytes[index];
+        }
 
-    inline std::vector<std::uint8_t>::const_iterator end() const noexcept {
-      // Call corresponding std::vector method.
-      return bytes.end();
-    }
+        inline const std::uint8_t& operator[](const std::size_t index) const noexcept {
+            // Call corresponding std::array overloaded operator.
+            return bytes[index];
+        }
 
-    inline void PushByte(const std::uint8_t byte) {
-      // Store one byte to the vector.
-      bytes.push_back(byte);
-    }
+        inline std::size_t GetRealSize() const noexcept {
+            return realSize;
+        }
 
-    void Encrypt(const Key& key) noexcept;
-    void Decrypt(const Key& key) noexcept;
-  private:
-    std::vector<std::uint8_t> bytes;
-  };
+        void Push(const std::uint8_t byte);
+
+        void Decrypt(const Block& key) noexcept;
+        void Encrypt(const Block& key) noexcept;
+    private:
+        std::array<std::uint8_t, SIZE> bytes;
+        std::size_t offset, realSize;
+    };
 }
 
 #endif // FISHCODE_BLOCK_HPP
-

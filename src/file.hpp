@@ -27,12 +27,10 @@
 
 namespace fc {
     class File {
-        using namespace std;
-        using namespace std::filesystem;
     public:
         File() = default;
-        File(const path& fsPath);
-        File(const path& fsPath, const bool isEncrypted);
+        File(const std::filesystem::path& fsPath);
+        File(const std::filesystem::path& fsPath, const bool isEncrypted);
         File(const File& anotherFile) = delete;
         File(File&& anotherFile) = default;
 
@@ -41,12 +39,15 @@ namespace fc {
         File& operator=(const File& anotherFile) = delete;
         File& operator=(File&& anotherFile) = default;
 
-        size_t GetSize() const noexcept;
-        Block ReadBlock(const size_t bytesToRead = Block::SIZE);
+        inline std::size_t GetSize() const noexcept {
+            return size;
+        }
+
+        Block ReadBlock(const std::size_t bytesToRead = Block::SIZE);
         void WriteBlock(const Block& block);
     private:
-        fstream stream;
-        size_t size, offset;
+        std::size_t offset, size;
+        std::fstream stream;
     };
 }
 

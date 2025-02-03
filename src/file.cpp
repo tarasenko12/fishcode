@@ -21,9 +21,9 @@
 #include <ios>
 #include <cstddef>
 #include "block.hpp"
-#include "error.hpp"
 #include "file.hpp"
 
+using std::ios;
 using std::filesystem::path;
 using std::size_t;
 
@@ -50,10 +50,6 @@ fc::File::File(const path& fsPath, const bool isEncrypted) {
 
     // Configure offset.
     offset = 0;
-}
-
-fc::File::GetSize() const noexcept {
-    return size;
 }
 
 fc::Block fc::File::ReadBlock(const size_t bytesToRead) {
