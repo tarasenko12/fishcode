@@ -1,7 +1,7 @@
 /*
-** Copyright (C) 2024-2025 Vitaliy Tarasenko.
+** Copyright (C) 2025 Vitaliy Tarasenko.
 **
-** This file is part of FishCode.
+** This file is part of FishCode (fishcode).
 **
 ** FishCode is free software: you can redistribute it and/or modify it under
 ** the terms of the GNU General Public License as published by the Free
@@ -23,53 +23,31 @@
 #include <filesystem>
 #include <fstream>
 #include <cstddef>
-#include <cstdint>
 #include "block.hpp"
-#include "key.hpp"
 
 namespace fc {
-  class InputFile {
-  public:
-    InputFile() = default;
-    InputFile(const std::filesystem::path& fsPath, const bool isEncrypted);
-    InputFile(const InputFile& anotherFile) = delete;
-    InputFile(InputFile&& anotherFile) = default;
+    class File {
+        using namespace std;
+        using namespace std::filesystem;
+    public:
+        File() = default;
+        File(const path& fsPath);
+        File(const path& fsPath, const bool isEncrypted);
+        File(const File& anotherFile) = delete;
+        File(File&& anotherFile) = default;
 
-    ~InputFile() noexcept = default;
+        ~File() noexcept = default;
 
-    InputFile& operator=(const InputFile& anotherFile) = delete;
-    InputFile& operator=(InputFile&& anotherFile) = default;
+        File& operator=(const File& anotherFile) = delete;
+        File& operator=(File&& anotherFile) = default;
 
-    std::size_t GetBlocksNumber() const noexcept;
-    std::size_t GetPartialBlockSize() const noexcept;
-    bool HasPartialBlock() const noexcept;
-    Block ReadBlock(const std::size_t bytesToRead = Block::CAPACITY);
-    Key ReadKey();
-  private:
-    std::ifstream stream;
-    std::size_t blocksNumber;
-    std::size_t partialBlockSize;
-    bool hasPartialBlock;
-  };
-
-  class OutputFile {
-  public:
-    OutputFile() = default;
-    OutputFile(const std::filesystem::path& fsPath);
-    OutputFile(const OutputFile& anotherFile) = delete;
-    OutputFile(OutputFile&& anotherFile) = default;
-
-    ~OutputFile() noexcept = default;
-
-    OutputFile& operator=(const OutputFile& anotherFile) = delete;
-    OutputFile& operator=(OutputFile&& anotherFile) = default;
-
-    void WriteBlock(const Block& block);
-    void WriteKey(const Key& key);
-  private:
-    std::ofstream stream;
-  };
+        size_t GetSize() const noexcept;
+        Block ReadBlock(const size_t bytesToRead = Block::SIZE);
+        void WriteBlock(const Block& block);
+    private:
+        fstream stream;
+        size_t size, offset;
+    };
 }
 
 #endif // FISHCODE_FILE_HPP
-
