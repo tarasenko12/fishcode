@@ -1,7 +1,7 @@
 /*
-** Copyright (C) 2024 Vitaliy Tarasenko.
+** Copyright (C) 2025 Vitaliy Tarasenko.
 **
-** This file is part of FishCode.
+** This file is part of FishCode (fishcode).
 **
 ** FishCode is free software: you can redistribute it and/or modify it under
 ** the terms of the GNU General Public License as published by the Free
@@ -20,42 +20,26 @@
 #include <string>
 #include <cstddef>
 #include <cstdint>
-#include "error.hpp"
 #include "password.hpp"
 
-fc::Password::Password(const std::string& passwordString) {
-  // Get length of the string (in bytes).
-  const auto length = passwordString.length();
+using std::string;
+using std::size_t;
+using std::uint8_t;
 
-  // Check password length.
-  if (length < MIN_LENGTH || length > MAX_LENGTH) {
-    // Invalid password.
-    throw InvalidPasswordError();
-  }
+fc::Password::Password(const string& passwordString) {
+    // Get length of the string (in bytes).
+    const auto length = passwordString.length();
 
-  // Check password characters.
-  for (const auto symbol : passwordString) {
-    if (symbol < '!' || symbol > '~') {
-      // Invalid symbol (and password too).
-      throw InvalidPasswordError();
+    // Convert each symbol into its binary representation and store it.
+    for (const auto symbol : passwordString) {
+        Push(static_cast<uint8_t>(symbol));
     }
-  }
 
-  // Convert each symbol to its binary representation and store it.
-  for (std::size_t index = 0; index < length; index++) {
-    bytes[index] = static_cast<std::uint8_t>(passwordString[index]);
-  }
-
-  // Check if password string has not maximal length.
-  if (length < SIZE) {
-    // Append additional bytes from the beginning.
-    for (
-      std::size_t index = 0, offset = length;
-      offset < SIZE;
-      offset++, index++
-     ) {
-      bytes[offset] = bytes[index];
+    // Check if password string doesn't have maximal length.
+    if (length < SIZE) {
+        // Append additional bytes from the beginning.
+        for (size_t counter = length, index = 0; counter < SIZE; counter++, index++) {
+            Push(*(this)[index]);
+        }
     }
-  }
 }
-

@@ -38,6 +38,8 @@ namespace fc {
         Block& operator=(const Block& otherBlock) = default;
         Block& operator=(Block&& otherBlock) = default;
 
+        static Block Generate();
+
         inline std::uint8_t& operator[](const std::size_t index) noexcept {
             // Call corresponding std::array overloaded operator.
             return bytes[index];
@@ -59,6 +61,8 @@ namespace fc {
     private:
         std::array<std::uint8_t, SIZE> bytes;
         std::size_t offset, realSize;
+
+        Block GetRoundVersion(const int round) const;
     };
 }
 

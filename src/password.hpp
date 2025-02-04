@@ -1,7 +1,7 @@
 /*
-** Copyright (C) 2024 Vitaliy Tarasenko.
+** Copyright (C) 2025 Vitaliy Tarasenko.
 **
-** This file is part of FishCode.
+** This file is part of FishCode (fishcode).
 **
 ** FishCode is free software: you can redistribute it and/or modify it under
 ** the terms of the GNU General Public License as published by the Free
@@ -22,25 +22,24 @@
 
 #include <string>
 #include <cstddef>
-#include "key.hpp"
+#include "block.hpp"
 
 namespace fc {
-  class Password : public Key {
-  public:
-    Password() = default;
-    Password(const std::string& passwordString);
-    Password(const Password& otherPassword) = default;
-    Password(Password&& otherPassword) = default;
+    class Password : public Block {
+    public:
+        static constexpr const std::size_t MIN_LENGTH = 8;
+        static constexpr const std::size_t MAX_LENGTH = SIZE;
 
-    ~Password() noexcept = default;
+        Password() = default;
+        Password(const std::string& passwordString);
+        Password(const Password& otherPassword) = default;
+        Password(Password&& otherPassword) = default;
 
-    Password& operator=(const Password& otherPassword) = default;
-    Password& operator=(Password&& otherPassword) = default;
-  private:
-    static constexpr const std::size_t MIN_LENGTH = 8;
-    static constexpr const std::size_t MAX_LENGTH = SIZE;
-  };
+        ~Password() noexcept = default;
+
+        Password& operator=(const Password& otherPassword) = default;
+        Password& operator=(Password&& otherPassword) = default;
+    };
 }
 
 #endif // FISHCODE_PASSWORD_HPP
-
