@@ -60,7 +60,7 @@ fc::Block fc::Block::Generate() {
     // Generate block by bytes.
     for (size_t counter = 0; counter < SIZE; counter++) {
         // Produce pseudo-random number and store it.
-        Push(static_cast<uint8_t>(distribute(generator)));
+        newBlock.Push(static_cast<uint8_t>(distribute(generator)));
     }
 
     // Return the block.
@@ -133,7 +133,7 @@ void fc::Block::Decrypt(const fc::Block& key) noexcept {
     }
 }
 
-fc::Block fc::Key::GetRoundVersion(const int round) const {
+fc::Block fc::Block::GetRoundVersion(const int round) const {
     // Create new empty round block.
     Block newRoundBlock;
 

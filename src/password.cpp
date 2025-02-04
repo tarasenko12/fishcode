@@ -39,7 +39,7 @@ fc::Password::Password(const string& passwordString) {
     if (length < SIZE) {
         // Append additional bytes from the beginning.
         for (size_t counter = length, index = 0; counter < SIZE; counter++, index++) {
-            Push(*(this)[index]);
+            Push((*this)[index]);
         }
     }
 }
