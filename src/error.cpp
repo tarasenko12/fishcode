@@ -1,7 +1,7 @@
 /*
-** Copyright (C) 2024 Vitaliy Tarasenko.
+** Copyright (C) 2025 Vitaliy Tarasenko.
 **
-** This file is part of FishCode.
+** This file is part of FishCode (fishcode).
 **
 ** FishCode is free software: you can redistribute it and/or modify it under
 ** the terms of the GNU General Public License as published by the Free
@@ -17,20 +17,35 @@
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <filesystem>
 #include "error.hpp"
 
-const char* fc::InvalidPasswordError::what() const noexcept {
-  // Return corresponding error message.
-  return "Invalid password!";
+using std::filesystem::equivalent;
+using std::filesystem::exists;
+using std::filesystem::path;
+
+const char* fc::Error::InvalidFileIO::what() const noexcept {
+    return "Invalid I/O configuration!";
 }
 
-const char* fc::InvalidInputFileError::what() const noexcept {
-  // Return corresponding error message.
-  return "Invalid input file!";
+const char* fc::Error::InvalidInputFile::what() const noexcept {
+    return "Invalid I/O configuration!";
 }
 
-const char* fc::InvalidOutputFileError::what() const noexcept {
-  // Return corresponding error message.
-  return "Invalid output file!";
+const char* fc::Error::InvalidOutputFile::what() const noexcept {
+    return "Invalid I/O configuration!";
 }
 
+const char* fc::Error::InvalidPassword::what() const noexcept {
+    return "Invalid I/O configuration!";
+}
+
+void fc::CheckFileIO(const path& inputFilePath, const path& outputFilePath) {
+  // Check if pathes are not equivalent.
+  if (exists(outputFilePath)) {
+    if (equivalent(inputFilePath, outputFilePath)) {
+      // Invalid file I/O.
+      throw InvalidFileIO();
+    }
+  }
+}

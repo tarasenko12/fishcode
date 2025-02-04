@@ -1,7 +1,7 @@
 /*
-** Copyright (C) 2024 Vitaliy Tarasenko.
+** Copyright (C) 2025 Vitaliy Tarasenko.
 **
-** This file is part of FishCode.
+** This file is part of FishCode (fishcode).
 **
 ** FishCode is free software: you can redistribute it and/or modify it under
 ** the terms of the GNU General Public License as published by the Free
@@ -23,48 +23,68 @@
 #include <exception>
 
 namespace fc {
-  class InvalidPasswordError : public std::exception {
-  public:
-    InvalidPasswordError() noexcept = default;
-    InvalidPasswordError(const InvalidPasswordError& other) = default;
-    InvalidPasswordError(InvalidPasswordError&& other) = default;
+    namespace Error {
+        class InvalidFileIO : public std::exception {
+        public:
+            InvalidFileIO() noexcept = default;
+            InvalidFileIO(const InvalidFileIO& other) = default;
+            InvalidFileIO(InvalidFileIO&& other) = default;
 
-    ~InvalidPasswordError() noexcept = default;
+            ~InvalidFileIO() noexcept = default;
 
-    InvalidPasswordError& operator=(const InvalidPasswordError& other) = default;
-    InvalidPasswordError& operator=(InvalidPasswordError&& other) = default;
+            InvalidFileIO& operator=(const InvalidFileIO& other) = default;
+            InvalidFileIO& operator=(InvalidFileIO&& other) = default;
 
-    const char* what() const noexcept override;
-  };
+            const char* what() const noexcept override;
+        };
 
-  class InvalidInputFileError : public std::exception {
-  public:
-    InvalidInputFileError() noexcept = default;
-    InvalidInputFileError(const InvalidInputFileError& other) = default;
-    InvalidInputFileError(InvalidInputFileError&& other) = default;
+        class InvalidInputFile : public std::exception {
+        public:
+            InvalidInputFile() noexcept = default;
+            InvalidInputFile(const InvalidInputFile& other) = default;
+            InvalidInputFile(InvalidInputFile&& other) = default;
 
-    ~InvalidInputFileError() noexcept = default;
+            ~InvalidInputFile() noexcept = default;
 
-    InvalidInputFileError& operator=(const InvalidInputFileError& other) = default;
-    InvalidInputFileError& operator=(InvalidInputFileError&& other) = default;
+            InvalidInputFile& operator=(const InvalidInputFile& other) = default;
+            InvalidInputFile& operator=(InvalidInputFile&& other) = default;
 
-    const char* what() const noexcept override;
-  };
+            const char* what() const noexcept override;
+        };
 
-  class InvalidOutputFileError : public std::exception {
-  public:
-    InvalidOutputFileError() noexcept = default;
-    InvalidOutputFileError(const InvalidOutputFileError& other) = default;
-    InvalidOutputFileError(InvalidOutputFileError&& other) = default;
+        class InvalidOutputFile : public std::exception {
+        public:
+            InvalidOutputFile() noexcept = default;
+            InvalidOutputFile(const InvalidOutputFile& other) = default;
+            InvalidOutputFile(InvalidOutputFile&& other) = default;
 
-    ~InvalidOutputFileError() noexcept = default;
+            ~InvalidOutputFile() noexcept = default;
 
-    InvalidOutputFileError& operator=(const InvalidOutputFileError& other) = default;
-    InvalidOutputFileError& operator=(InvalidOutputFileError&& other) = default;
+            InvalidOutputFile& operator=(const InvalidOutputFile& other) = default;
+            InvalidOutputFile& operator=(InvalidOutputFile&& other) = default;
 
-    const char* what() const noexcept override;
-  };
+            const char* what() const noexcept override;
+        };
+
+        class InvalidPassword : public std::exception {
+        public:
+            InvalidPassword() noexcept = default;
+            InvalidPassword(const InvalidPassword& other) = default;
+            InvalidPassword(InvalidPassword&& other) = default;
+
+            ~InvalidPassword() noexcept = default;
+
+            InvalidPassword& operator=(const InvalidPassword& other) = default;
+            InvalidPassword& operator=(InvalidPassword&& other) = default;
+
+            const char* what() const noexcept override;
+        };
+    }
+
+    void CheckFileIO(const std::filesystem::path& inputFilePath, const std::filesystem::path& outputFilePath);
+    void CheckInputFile(const std::filesystem::path& inputFilePath);
+    void CheckOutputFile(const std::filesystem::path& outputFilePath);
+    void CheckPassword(const std::string& passwordString);
 }
 
 #endif // FISHCODE_ERROR_HPP
-
