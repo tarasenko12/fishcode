@@ -1,7 +1,7 @@
 /*
-** Copyright (C) 2024-2025 Vitaliy Tarasenko.
+** Copyright (C) 2025 Vitaliy Tarasenko.
 **
-** This file is part of FishCode.
+** This file is part of FishCode (fishcode).
 **
 ** FishCode is free software: you can redistribute it and/or modify it under
 ** the terms of the GNU General Public License as published by the Free
@@ -49,7 +49,6 @@
 #include "error.hpp"
 #include "file.hpp"
 #include "fishcode.hpp"
-#include "key.hpp"
 #include "password.hpp"
 #include "strings.hpp"
 
@@ -57,206 +56,206 @@
 wxIMPLEMENT_APP(fc::FishCode);
 
 bool fc::FishCode::OnInit() try {
-  // Create the main window (frame).
-  frame = new wxFrame(nullptr, wxID_ANY, STR_NAME0);
+    // Create the main window (frame).
+    frame = new wxFrame(nullptr, wxID_ANY, STR_NAME0);
 
-  // Create a new menu bar for the frame.
-  menuBar = new wxMenuBar();
+    // Create a new menu bar for the frame.
+    menuBar = new wxMenuBar();
 
-  // Initialize menu bar menu(s).
-  menuMore = new wxMenu();
+    // Initialize menu bar menu(s).
+    menuMore = new wxMenu();
 
-  // Initialize menuMore items and append them to the menu.
-  menuMore->Append(wxID_ABOUT, STR_NAME2, STR_PROMPT0);
-  menuMore->Append(wxID_HELP, STR_NAME3, STR_PROMPT1);
+    // Initialize menuMore items and append them to the menu.
+    menuMore->Append(wxID_ABOUT, STR_NAME2, STR_PROMPT0);
+    menuMore->Append(wxID_HELP, STR_NAME3, STR_PROMPT1);
 
-  // Append menu(s) to the menu bar.
-  menuBar->Append(menuMore, STR_NAME1);
+    // Append menu(s) to the menu bar.
+    menuBar->Append(menuMore, STR_NAME1);
 
-  // Connect menu bar to the frame.
-  frame->SetMenuBar(menuBar);
+    // Connect menu bar to the frame.
+    frame->SetMenuBar(menuBar);
 
-  // Create a new status bar for the frame.
-  statusBar = new wxStatusBar(frame);
+    // Create a new status bar for the frame.
+    statusBar = new wxStatusBar(frame);
 
-  // Set the default status.
-  statusBar->SetStatusText(STR_STATUS0);
+    // Set the default status.
+    statusBar->SetStatusText(STR_STATUS0);
 
-  // Add this status bar to the frame.
-  frame->SetStatusBar(statusBar);
+    // Add this status bar to the frame.
+    frame->SetStatusBar(statusBar);
 
-  // Configure the about dialog.
-  aboutDialogInfo.SetName(STR_NAME0);
-  aboutDialogInfo.SetVersion(STR_VERSION);
-  aboutDialogInfo.SetDescription(STR_DESCRYPTION);
-  aboutDialogInfo.SetCopyright(STR_COPYRIGHT);
-  aboutDialogInfo.AddDeveloper(STR_DEVELOPER);
+    // Configure the about dialog.
+    aboutDialogInfo.SetName(STR_NAME0);
+    aboutDialogInfo.SetVersion(STR_VERSION);
+    aboutDialogInfo.SetDescription(STR_DESCRYPTION);
+    aboutDialogInfo.SetCopyright(STR_COPYRIGHT);
+    aboutDialogInfo.AddDeveloper(STR_DEVELOPER);
 
-  // Initialize new sizer for the main window.
-  mainSizer = new wxBoxSizer(wxVERTICAL);
+    // Initialize new sizer for the main window.
+    mainSizer = new wxBoxSizer(wxVERTICAL);
 
-  // Configure grid sizers layout.
-  const wxSize gridLayout(5, 5);
+    // Configure grid sizers layout.
+    const wxSize gridLayout(5, 5);
 
-  // Configure sizers (using flags).
-  const auto mainSizerFlags = wxSizerFlags()
+    // Configure sizers (using flags).
+    const auto mainSizerFlags = wxSizerFlags()
     .Expand()
     .Border(wxALL, 5);
-  const auto gridSizerFlags = wxSizerFlags()
+    const auto gridSizerFlags = wxSizerFlags()
     .Expand()
     .Border(wxALL, 10);
-  const auto gridLabelSizerFlags = wxSizerFlags()
+    const auto gridLabelSizerFlags = wxSizerFlags()
     .Center()
     .Right()
     .Border(wxALL, 2);
 
-  // Set layout for the fields.
-  const wxSize fieldSize(400, 45);
+    // Set layout for the fields.
+    const wxSize fieldSize(400, 45);
 
-  // Create sizer for the input file chooser.
-  inputFileSizer = new wxFlexGridSizer(1, 3, gridLayout);
+    // Create sizer for the input file chooser.
+    inputFileSizer = new wxFlexGridSizer(1, 3, gridLayout);
 
-  // Create context for this sizer.
-  inputFileLabel = new wxStaticText(frame, wxID_ANY, STR_LABEL0);
-  inputFileLine = new wxTextCtrl(frame, wxID_ANY);
-  inputFileChooser = new wxButton(frame, ID_CHOOSE, STR_LABEL2);
+    // Create context for this sizer.
+    inputFileLabel = new wxStaticText(frame, wxID_ANY, STR_LABEL0);
+    inputFileLine = new wxTextCtrl(frame, wxID_ANY);
+    inputFileChooser = new wxButton(frame, ID_CHOOSE, STR_LABEL2);
 
-  // Configure input file line layout.
-  inputFileLine->SetMinSize(fieldSize);
+    // Configure input file line layout.
+    inputFileLine->SetMinSize(fieldSize);
 
-  // Add context to the sizer.
-  inputFileSizer->Add(inputFileLabel, gridLabelSizerFlags);
-  inputFileSizer->Add(inputFileLine, gridSizerFlags);
-  inputFileSizer->Add(inputFileChooser, gridSizerFlags);
+    // Add context to the sizer.
+    inputFileSizer->Add(inputFileLabel, gridLabelSizerFlags);
+    inputFileSizer->Add(inputFileLine, gridSizerFlags);
+    inputFileSizer->Add(inputFileChooser, gridSizerFlags);
 
-  // Set growable columns for this sizer.
-  inputFileSizer->AddGrowableCol(1);
-  inputFileSizer->AddGrowableCol(2);
+    // Set growable columns for this sizer.
+    inputFileSizer->AddGrowableCol(1);
+    inputFileSizer->AddGrowableCol(2);
 
-  // Connect main sizer with this sizer.
-  mainSizer->Add(inputFileSizer, mainSizerFlags);
+    // Connect main sizer with this sizer.
+    mainSizer->Add(inputFileSizer, mainSizerFlags);
 
-  // Create sizer for the output file setter.
-  outputFileSizer = new wxFlexGridSizer(1, 3, gridLayout);
+    // Create sizer for the output file setter.
+    outputFileSizer = new wxFlexGridSizer(1, 3, gridLayout);
 
-  // Create context for this sizer.
-  outputFileLabel = new wxStaticText(frame, wxID_ANY, STR_LABEL1);
-  outputFileLine = new wxTextCtrl(frame, wxID_ANY);
-  outputFileSetter = new wxButton(frame, ID_SET, STR_LABEL3);
+    // Create context for this sizer.
+    outputFileLabel = new wxStaticText(frame, wxID_ANY, STR_LABEL1);
+    outputFileLine = new wxTextCtrl(frame, wxID_ANY);
+    outputFileSetter = new wxButton(frame, ID_SET, STR_LABEL3);
 
-  // Configure output file line layout.
-  outputFileLine->SetMinSize(fieldSize);
+    // Configure output file line layout.
+    outputFileLine->SetMinSize(fieldSize);
 
-  // Add context to the sizer.
-  outputFileSizer->Add(outputFileLabel, gridLabelSizerFlags);
-  outputFileSizer->Add(outputFileLine, gridSizerFlags);
-  outputFileSizer->Add(outputFileSetter, gridSizerFlags);
+    // Add context to the sizer.
+    outputFileSizer->Add(outputFileLabel, gridLabelSizerFlags);
+    outputFileSizer->Add(outputFileLine, gridSizerFlags);
+    outputFileSizer->Add(outputFileSetter, gridSizerFlags);
 
-  // Set growable columns for this sizer.
-  outputFileSizer->AddGrowableCol(1);
-  outputFileSizer->AddGrowableCol(2);
+    // Set growable columns for this sizer.
+    outputFileSizer->AddGrowableCol(1);
+    outputFileSizer->AddGrowableCol(2);
 
-  // Connect main sizer with this sizer.
-  mainSizer->Add(outputFileSizer, mainSizerFlags);
+    // Connect main sizer with this sizer.
+    mainSizer->Add(outputFileSizer, mainSizerFlags);
 
-  // Create sizer for password listener.
-  passwordSizer = new wxFlexGridSizer(1, 2, gridLayout);
+    // Create sizer for password listener.
+    passwordSizer = new wxFlexGridSizer(1, 2, gridLayout);
 
-  // Create context for this sizer.
-  passwordLabel = new wxStaticText(frame, wxID_ANY, STR_LABEL4);
-  passwordLine = new wxTextCtrl(
+    // Create context for this sizer.
+    passwordLabel = new wxStaticText(frame, wxID_ANY, STR_LABEL4);
+    passwordLine = new wxTextCtrl(
     frame,
     wxID_ANY,
     wxEmptyString,
     wxDefaultPosition,
     wxDefaultSize,
     wxTE_PASSWORD
-  );
+    );
 
-  // Configure password listener.
-  passwordLine->SetMaxLength(Password::SIZE);
-  passwordLine->SetMinSize(fieldSize);
+    // Configure password listener.
+    passwordLine->SetMaxLength(Password::SIZE);
+    passwordLine->SetMinSize(fieldSize);
 
-  // Add context to the sizer.
-  passwordSizer->Add(passwordLabel, gridLabelSizerFlags);
-  passwordSizer->Add(passwordLine, gridSizerFlags);
+    // Add context to the sizer.
+    passwordSizer->Add(passwordLabel, gridLabelSizerFlags);
+    passwordSizer->Add(passwordLine, gridSizerFlags);
 
-  // Set growable column for this sizer.
-  passwordSizer->AddGrowableCol(1);
+    // Set growable column for this sizer.
+    passwordSizer->AddGrowableCol(1);
 
-  // Connect main sizer with this sizer.
-  mainSizer->Add(passwordSizer, mainSizerFlags);
+    // Connect main sizer with this sizer.
+    mainSizer->Add(passwordSizer, mainSizerFlags);
 
-  // Create a progress bar (0% - 100%).
-  progressBar = new wxGauge(
+    // Create a progress bar (0% - 100%).
+    progressBar = new wxGauge(
     frame,
     wxID_ANY,
     100,
     wxDefaultPosition,
     wxDefaultSize,
     wxGA_HORIZONTAL | wxGA_TEXT | wxGA_PROGRESS
-  );
+    );
 
-  // Configure progress bar size.
-  progressBar->SetMinSize(wxSize(400, 15));
+    // Configure progress bar size.
+    progressBar->SetMinSize(wxSize(400, 15));
 
-  // Add progress bar to the main sizer.
-  mainSizer->Add(progressBar, mainSizerFlags);
+    // Add progress bar to the main sizer.
+    mainSizer->Add(progressBar, mainSizerFlags);
 
-  // Create sizer for the main control buttons.
-  buttonsSizer = new wxGridSizer(1, 2, gridLayout);
+    // Create sizer for the main control buttons.
+    buttonsSizer = new wxGridSizer(1, 2, gridLayout);
 
-  // Create main control buttons.
-  encryptButton = new wxButton(frame, ID_ENCRYPT, STR_LABEL5);
-  decryptButton = new wxButton(frame, ID_DECRYPT, STR_LABEL6);
-  cancelButton = new wxButton(frame, ID_CANCEL, STR_LABEL7);
+    // Create main control buttons.
+    encryptButton = new wxButton(frame, ID_ENCRYPT, STR_LABEL5);
+    decryptButton = new wxButton(frame, ID_DECRYPT, STR_LABEL6);
+    cancelButton = new wxButton(frame, ID_CANCEL, STR_LABEL7);
 
-  // Disable "Cancel" button for now.
-  cancelButton->Disable();
+    // Disable "Cancel" button for now.
+    cancelButton->Disable();
 
-  // Add some buttons to the sizer.
-  buttonsSizer->Add(encryptButton, gridSizerFlags);
-  buttonsSizer->Add(decryptButton, gridSizerFlags);
+    // Add some buttons to the sizer.
+    buttonsSizer->Add(encryptButton, gridSizerFlags);
+    buttonsSizer->Add(decryptButton, gridSizerFlags);
 
-  // Connect this sizer to the main sizer.
-  mainSizer->Add(buttonsSizer, mainSizerFlags);
+    // Connect this sizer to the main sizer.
+    mainSizer->Add(buttonsSizer, mainSizerFlags);
 
-  // Add "Cancel" button to the main sizer.
-  mainSizer->Add(cancelButton, mainSizerFlags);
+    // Add "Cancel" button to the main sizer.
+    mainSizer->Add(cancelButton, mainSizerFlags);
 
-  // Connect main window (frame) with sizer.
-  frame->SetSizerAndFit(mainSizer);
+    // Connect main window (frame) with sizer.
+    frame->SetSizerAndFit(mainSizer);
 
-  // Configure timer.
-  readyTimer.SetOwner(frame, ID_READY);
+    // Configure timer.
+    readyTimer.SetOwner(frame, ID_READY);
 
-  // Configure event handlers.
-  frame->Bind(wxEVT_MENU, &fc::FishCode::OnAbout, this, wxID_ABOUT);
-  frame->Bind(wxEVT_MENU, &fc::FishCode::OnHelp, this, wxID_HELP);
-  inputFileChooser->Bind(wxEVT_BUTTON, &fc::FishCode::OnChoose, this, ID_CHOOSE);
-  outputFileSetter->Bind(wxEVT_BUTTON, &fc::FishCode::OnSet, this, ID_SET);
-  encryptButton->Bind(wxEVT_BUTTON, &fc::FishCode::OnEncrypt, this, ID_ENCRYPT);
-  decryptButton->Bind(wxEVT_BUTTON, &fc::FishCode::OnDecrypt, this, ID_DECRYPT);
-  cancelButton->Bind(wxEVT_BUTTON, &fc::FishCode::OnCancel, this, ID_CANCEL);
-  frame->Bind(
+    // Configure event handlers.
+    frame->Bind(wxEVT_MENU, &fc::FishCode::OnAbout, this, wxID_ABOUT);
+    frame->Bind(wxEVT_MENU, &fc::FishCode::OnHelp, this, wxID_HELP);
+    inputFileChooser->Bind(wxEVT_BUTTON, &fc::FishCode::OnChoose, this, ID_CHOOSE);
+    outputFileSetter->Bind(wxEVT_BUTTON, &fc::FishCode::OnSet, this, ID_SET);
+    encryptButton->Bind(wxEVT_BUTTON, &fc::FishCode::OnEncrypt, this, ID_ENCRYPT);
+    decryptButton->Bind(wxEVT_BUTTON, &fc::FishCode::OnDecrypt, this, ID_DECRYPT);
+    cancelButton->Bind(wxEVT_BUTTON, &fc::FishCode::OnCancel, this, ID_CANCEL);
+    frame->Bind(
     wxEVT_UPDATE_UI,
     &fc::FishCode::OnProgressUpdate,
     this,
     ID_UPDATE_PROGRESS
-  );
-  frame->Bind(
+    );
+    frame->Bind(
     wxEVT_UPDATE_UI,
     &fc::FishCode::OnDoneUpdate,
     this,
     ID_UPDATE_DONE
-  );
-  frame->Bind(wxEVT_TIMER, &fc::FishCode::OnReadyTimer, this, ID_READY);
+    );
+    frame->Bind(wxEVT_TIMER, &fc::FishCode::OnReadyTimer, this, ID_READY);
 
-  // Show the window.
-  frame->Show();
+    // Show the window.
+    frame->Show();
 
-  // Start the application.
-  return true;
+    // Start the application.
+    return true;
 } catch (const std::exception& ex) {
   // Display GUI error message.
   wxMessageBox(ex.what(), STR_CAPTION3, wxOK | wxCENTRE | wxICON_ERROR);
@@ -512,110 +511,6 @@ void fc::FishCode::OnReadyTimer(wxTimerEvent& event) {
   EnableControls();
 }
 
-void fc::FishCode::Encrypt(wxFrame* sink, fc::FishCode::Data&& data) {
-  // Calculate total number of full blocks in the file.
-  const auto total = data.inputFile.GetBlocksNumber();
-
-  // Calculate number of blocks for one percent.
-  const auto onePercent = total / 100;
-
-  // Create progress counter (blocks).
-  std::size_t counter = 0;
-
-  // Decrypt the input file by blocks.
-  while (counter < total && !shouldCancel) {
-    // Read one block from the file.
-    auto block = data.inputFile.ReadBlock();
-
-    // Encrypt the block.
-    block.Encrypt(data.key);
-
-    // Store block to the output file.
-    data.outputFile.WriteBlock(block);
-
-    // Increment progress counter by 1 block.
-    counter++;
-
-    // Check if there is a valuable progress.
-    if (counter % onePercent == 0) {
-      // Increment progress counter by 1%.
-      progress++;
-
-      // Notify the main thread about UI update.
-      wxPostEvent(sink, wxCommandEvent(wxEVT_UPDATE_UI, ID_UPDATE_PROGRESS));
-    }
-  }
-
-  // Check if the input file has partial block.
-  if (data.inputFile.HasPartialBlock() && !shouldCancel) {
-    // Read partial block.
-    auto block = data.inputFile.ReadBlock(data.inputFile.GetPartialBlockSize());
-
-    // Encrypt the block.
-    block.Encrypt(data.key);
-
-    // Store block to the output file.
-    data.outputFile.WriteBlock(block);
-  }
-
-  // Notify the main thread about task completition (if it is not aborted).
-  if (!shouldCancel) {
-    wxPostEvent(sink, wxCommandEvent(wxEVT_UPDATE_UI, ID_UPDATE_DONE));
-  }
-}
-
-void fc::FishCode::Decrypt(wxFrame* sink, fc::FishCode::Data&& data) {
-  // Calculate total number of full blocks in the file.
-  const auto total = data.inputFile.GetBlocksNumber();
-
-  // Calculate number of blocks for one percent.
-  const auto onePercent = total / 100;
-
-  // Create progress counter (blocks).
-  std::size_t counter = 0;
-
-  // Decrypt the input file by blocks.
-  while (counter < total && !shouldCancel) {
-    // Read one block from the file.
-    auto block = data.inputFile.ReadBlock();
-
-    // Decrypt the block.
-    block.Decrypt(data.key);
-
-    // Store block to the output file.
-    data.outputFile.WriteBlock(block);
-
-    // Increment progress counter by 1 block.
-    counter++;
-
-    // Check if there is a valuable progress.
-    if (counter % onePercent == 0) {
-      // Increment progress counter by 1%.
-      progress++;
-
-      // Notify the main thread about UI update.
-      wxPostEvent(sink, wxCommandEvent(wxEVT_UPDATE_UI, ID_UPDATE_PROGRESS));
-    }
-  }
-
-  // Check if the input file has partial block.
-  if (data.inputFile.HasPartialBlock() && !shouldCancel) {
-    // Read partial block.
-    auto block = data.inputFile.ReadBlock(data.inputFile.GetPartialBlockSize());
-
-    // Decrypt the block.
-    block.Decrypt(data.key);
-
-    // Store block to the output file.
-    data.outputFile.WriteBlock(block);
-  }
-
-  // Notify the main thread about task completition (if it is not aborted).
-  if (!shouldCancel) {
-    wxPostEvent(sink, wxCommandEvent(wxEVT_UPDATE_UI, ID_UPDATE_DONE));
-  }
-}
-
 void fc::FishCode::EnableControls() {
   // Enable all control items (except "Cancel" button).
   inputFileLine->Enable();
@@ -638,10 +533,10 @@ void fc::FishCode::DisableControls() {
   decryptButton->Disable();
 }
 
-std::filesystem::path fc::FishCode::GetFilePath(wxTextCtrl* fileLine) {
-  if (fileLine) {
+std::filesystem::path fc::FishCode::GetFilePath(wxTextCtrl* field) {
+  if (field) {
     // Get string from the field.
-    const std::string pathString = fileLine->GetValue().utf8_string();
+    const std::string pathString = field->GetValue().utf8_string();
 
     // Check the string.
     if (pathString.empty()) {
@@ -659,20 +554,4 @@ std::filesystem::path fc::FishCode::GetFilePath(wxTextCtrl* fileLine) {
     // Invalid file line pointer.
     throw std::invalid_argument("Invalid pointer for GetFilePath()!");
   }
-}
-
-bool fc::FishCode::IsValidOutputFile(
-  const std::filesystem::path& inputFilePath,
-  const std::filesystem::path& outputFilePath
-) {
-  // Check if pathes are not equivalent.
-  if (std::filesystem::exists(outputFilePath)) {
-    if (std::filesystem::equivalent(inputFilePath, outputFilePath)) {
-      // Invalid output file.
-      return false;
-    }
-  }
-
-  // Valid output file.
-  return true;
 }
