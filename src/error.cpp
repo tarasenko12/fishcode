@@ -24,19 +24,19 @@ using std::filesystem::equivalent;
 using std::filesystem::exists;
 using std::filesystem::path;
 
-const char* fc::Error::InvalidFileIO::what() const noexcept {
+const char* fc::error::InvalidFileIO::what() const noexcept {
     return "Invalid I/O configuration!";
 }
 
-const char* fc::Error::InvalidInputFile::what() const noexcept {
+const char* fc::error::InvalidInputFile::what() const noexcept {
     return "Invalid I/O configuration!";
 }
 
-const char* fc::Error::InvalidOutputFile::what() const noexcept {
+const char* fc::error::InvalidOutputFile::what() const noexcept {
     return "Invalid I/O configuration!";
 }
 
-const char* fc::Error::InvalidPassword::what() const noexcept {
+const char* fc::error::InvalidPassword::what() const noexcept {
     return "Invalid I/O configuration!";
 }
 
@@ -45,7 +45,7 @@ void fc::CheckFileIO(const path& inputFilePath, const path& outputFilePath) {
   if (exists(outputFilePath)) {
     if (equivalent(inputFilePath, outputFilePath)) {
       // Invalid file I/O.
-      throw InvalidFileIO();
+      throw error::InvalidFileIO();
     }
   }
 }

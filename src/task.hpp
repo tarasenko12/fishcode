@@ -15,18 +15,29 @@
 **
 ** You should have received a copy of the GNU General Public License along
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
+**
+** This program uses wxWidgets, a free and open-source cross-platform C++
+** library for creating GUIs. wxWidgets is licensed under the wxWindows
+** Library License, which is compatible with the GNU GPL.
+** See <https://www.wxwidgets.org/about/licence/>.
 */
 
 #ifndef FISHCODE_TASK_HPP
 #define FISHCODE_TASK_HPP
 
+#include <atomic>
+#include <memory>
+#include <utility>
 #include <cstddef>
+#include <wx/event.h>
 #include "block.hpp"
 #include "file.hpp"
 #include "password.hpp"
 
 namespace fc {
     class Task {
+        friend void TaskDecrypt(wxEvtHandler* sink, std::unique_ptr<Task>&& task);
+        friend void TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<Task>&& task);
     public:
         Task() = default;
         Task(const Task& otherTask) = default;
@@ -37,52 +48,16 @@ namespace fc {
         Task& operator=(const Task& otherTask) = default;
         Task& operator=(Task&& otherTask) = default;
 
-        inline File& GetInputFile() const noexcept {
-            return data.inputFile;
-        }
-
-        inline File& GetOutputFile() const noexcept {
-            return data.outputFile;
-        }
-
-        inline Block GetKey() const {
-            return data.key;
-        }
-
-        inline Password GetPassword() const {
-            return data.password;
-        }
-
-        inline std::size_t GetCurrentProgress() const noexcept {
-            return progressData.current;
-        }
-
-        inline std::size_t GetTotalProgress() const noexcept {
-            return progressData.total;
-        }
-
         inline void SetInputFile(File&& newInputFile) {
-            data.inputFile = newInputFile;
+            data.inputFile = std::move(newInputFile);
         }
 
         inline void SetOutputFile(File&& newOutputFile) {
-            data.outputFile = newOutputFile;
-        }
-
-        inline void SetKey(const Block& newKey) {
-            data.key = newKey;
+            data.outputFile = std::move(newOutputFile);
         }
 
         inline void SetPassword(const Password& newPassword) {
             data.password = newPassword;
-        }
-
-        inline void SetCurrentProgress(const std::size_t newCurrent) {
-            progressData.current = newCurrent;
-        }
-
-        inline void SetTotalProgress(const std::size_t newTotal) {
-            progressData.total = newTotal;
         }
     private:
         struct Data {
@@ -114,8 +89,10 @@ namespace fc {
         } progressData;
     };
 
-    void TaskEncrypt(wxEvtHandler* sink, Task&& taskData);
-    void TaskDecrypt(wxEvtHandler* sink, Task&& taskData);
+    extern std::atomic<bool> taskShouldCancel;
+
+    void TaskDecrypt(wxEvtHandler* sink, std::unique_ptr<Task>&& task);
+    void TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<Task>&& task);
 }
 
 #endif // FISHCODE_TASK_HPP

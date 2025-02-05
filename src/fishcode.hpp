@@ -25,10 +25,8 @@
 #ifndef FISHCODE_HPP
 #define FISHCODE_HPP
 
-#include <atomic>
 #include <filesystem>
 #include <thread>
-#include <cstddef>
 #include <wx/aboutdlg.h>
 #include <wx/app.h>
 #include <wx/button.h>
@@ -41,26 +39,10 @@
 #include <wx/statusbr.h>
 #include <wx/textctrl.h>
 #include <wx/timer.h>
+#include "events.hpp"
 #include "task.hpp"
 
 namespace fc {
-    enum ControlItemID {
-        ID_CHOOSE = 1,
-        ID_SET,
-        ID_ENCRYPT,
-        ID_DECRYPT,
-        ID_CANCEL
-    };
-
-    enum TimerID {
-        ID_READY = ID_CANCEL + 1
-    };
-
-    enum UpdateEventID {
-        ID_UPDATE_PROGRESS = ID_READY + 1,
-        ID_UPDATE_DONE
-    };
-
     class FishCode : public wxApp {
     public:
         FishCode();
@@ -76,7 +58,6 @@ namespace fc {
         int OnExit() override;
     private:
         std::thread taskThread;
-        std::atomic<bool> taskShouldCancel;
         wxFrame* frame;
         wxMenuBar* menuBar;
         wxMenu* menuMore;
@@ -108,8 +89,8 @@ namespace fc {
         void OnEncrypt(wxCommandEvent& event);
         void OnDecrypt(wxCommandEvent& event);
         void OnCancel(wxCommandEvent& event);
-        void OnProgressUpdate(wxCommandEvent& event);
-        void OnDoneUpdate(wxCommandEvent& event);
+        void OnProgressUpdate(events::UpdateProgress& event);
+        void OnDoneUpdate(events::UpdateDone& event);
         void OnReadyTimer(wxTimerEvent& event);
 
         std::filesystem::path GetFilePath(wxTextCtrl* field);

@@ -23,7 +23,7 @@
 #include <exception>
 
 namespace fc {
-    namespace Error {
+    namespace error {
         class InvalidFileIO : public std::exception {
         public:
             InvalidFileIO() noexcept = default;

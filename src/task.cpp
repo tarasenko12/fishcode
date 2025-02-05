@@ -15,9 +15,22 @@
 **
 ** You should have received a copy of the GNU General Public License along
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
+**
+** This program uses wxWidgets, a free and open-source cross-platform C++
+** library for creating GUIs. wxWidgets is licensed under the wxWindows
+** Library License, which is compatible with the GNU GPL.
+** See <https://www.wxwidgets.org/about/licence/>.
 */
 
+#include <atomic>
+#include <memory>
+#include <cstddef>
+#include <wx/event.h>
+#include "block.hpp"
+#include "events.hpp"
 #include "task.hpp"
+
+using std::size_t;
 
 fc::Task::ProgressData::ProgressData() {
     // No progress for now.
@@ -27,107 +40,123 @@ fc::Task::ProgressData::ProgressData() {
     total = 0;
 }
 
-// TODO
-void fc::FishCode::Encrypt(wxFrame* sink, fc::FishCode::Data&& data) {
-  // Calculate total number of full blocks in the file.
-  const auto total = data.inputFile.GetBlocksNumber();
+// Disable task abortion (default).
+std::atomic<bool> fc::taskShouldCancel(false);
 
-  // Calculate number of blocks for one percent.
-  const auto onePercent = total / 100;
+void fc::TaskDecrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task>&& task) {
+    // Calculate total number of full blocks in the file.
+    task->progressData.total = task->data.inputFile.GetSize() / Block::SIZE;
 
-  // Create progress counter (blocks).
-  std::size_t counter = 0;
+    // Read decryption (encrypted) key from the file.
+    task->data.key = task->data.inputFile.ReadBlock();
 
-  // Decrypt the input file by blocks.
-  while (counter < total && !shouldCancel) {
-    // Read one block from the file.
-    auto block = data.inputFile.ReadBlock();
+    // Decrypt the key using password.
+    task->data.key.Decrypt(task->data.password);
 
-    // Encrypt the block.
-    block.Encrypt(data.key);
+    // Decrypt the input file by blocks.
+    for (size_t counter = 0; counter < task->progressData.total; counter++, task->progressData.current++) {
+        // Check for task abortion.
+        if (taskShouldCancel) {
+            // Stop the loop.
+            break;
+        }
 
-    // Store block to the output file.
-    data.outputFile.WriteBlock(block);
+        // Read one block from the file.
+        auto block = task->data.inputFile.ReadBlock();
 
-    // Increment progress counter by 1 block.
-    counter++;
+        // Decrypt the block.
+        block.Decrypt(task->data.key);
 
-    // Check if there is a valuable progress.
-    if (counter % onePercent == 0) {
-      // Increment progress counter by 1%.
-      progress++;
+        // Store block to the output file.
+        task->data.outputFile.WriteBlock(block);
 
-      // Notify the main thread about UI update.
-      wxPostEvent(sink, wxCommandEvent(wxEVT_UPDATE_UI, ID_UPDATE_PROGRESS));
+        // Notify the main thread about UI update.
+        wxPostEvent(sink, events::UpdateProgress(task->progressData.current / task->progressData.total * 100));
     }
-  }
 
-  // Check if the input file has partial block.
-  if (data.inputFile.HasPartialBlock() && !shouldCancel) {
-    // Read partial block.
-    auto block = data.inputFile.ReadBlock(data.inputFile.GetPartialBlockSize());
+    // Check if file contains a partial block (realSize < SIZE).
+    if (task->data.inputFile.GetSize() % Block::SIZE != 0 && !taskShouldCancel) {
+        // Calculate block size.
+        const auto blockSize = task->data.inputFile.GetSize() % Block::SIZE;
 
-    // Encrypt the block.
-    block.Encrypt(data.key);
+        // Read block from the file.
+        auto block = task->data.inputFile.ReadBlock(blockSize);
 
-    // Store block to the output file.
-    data.outputFile.WriteBlock(block);
-  }
+        // Decrypt the block.
+        block.Decrypt(task->data.key);
 
-  // Notify the main thread about task completition (if it is not aborted).
-  if (!shouldCancel) {
-    wxPostEvent(sink, wxCommandEvent(wxEVT_UPDATE_UI, ID_UPDATE_DONE));
-  }
+        // Store block to the output file.
+        task->data.outputFile.WriteBlock(block);
+
+        // Set progress to 100%, if it is not already set.
+        if (task->progressData.current == 0) {
+            // Notify the main thread about UI update.
+            wxPostEvent(sink, events::UpdateProgress(100));
+        }
+    }
+
+    // Notify the main thread about task completition.
+    wxPostEvent(sink, events::UpdateDone());
 }
-// TODO
-void fc::FishCode::Decrypt(wxFrame* sink, fc::FishCode::Data&& data) {
-  // Calculate total number of full blocks in the file.
-  const auto total = data.inputFile.GetBlocksNumber();
 
-  // Calculate number of blocks for one percent.
-  const auto onePercent = total / 100;
+void fc::TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task>&& task) {
+    // Calculate total number of full blocks in the file.
+    task->progressData.total = task->data.inputFile.GetSize() / Block::SIZE;
 
-  // Create progress counter (blocks).
-  std::size_t counter = 0;
+    // Generate encryption key.
+    task->data.key = Block::Generate();
 
-  // Decrypt the input file by blocks.
-  while (counter < total && !shouldCancel) {
-    // Read one block from the file.
-    auto block = data.inputFile.ReadBlock();
+    // Encrypt the key.
+    task->data.key.Encrypt(task->data.password);
 
-    // Decrypt the block.
-    block.Decrypt(data.key);
+    // Write key (encrypted) to the output file.
+    task->data.outputFile.WriteBlock(task->data.key);
 
-    // Store block to the output file.
-    data.outputFile.WriteBlock(block);
+    // Decrypt the key.
+    task->data.key.Decrypt(task->data.password);
 
-    // Increment progress counter by 1 block.
-    counter++;
+    // Encrypt the input file by blocks.
+    for (size_t counter = 0; counter < task->progressData.total; counter++, task->progressData.current++) {
+        // Check for task abortion.
+        if (taskShouldCancel) {
+            // Stop the loop.
+            break;
+        }
 
-    // Check if there is a valuable progress.
-    if (counter % onePercent == 0) {
-      // Increment progress counter by 1%.
-      progress++;
+        // Read one block from the file.
+        auto block = task->data.inputFile.ReadBlock();
 
-      // Notify the main thread about UI update.
-      wxPostEvent(sink, wxCommandEvent(wxEVT_UPDATE_UI, ID_UPDATE_PROGRESS));
+        // Encrypt the block.
+        block.Encrypt(task->data.key);
+
+        // Store block to the output file.
+        task->data.outputFile.WriteBlock(block);
+
+        // Notify the main thread about UI update.
+        wxPostEvent(sink, events::UpdateProgress(task->progressData.current / task->progressData.total * 100));
     }
-  }
 
-  // Check if the input file has partial block.
-  if (data.inputFile.HasPartialBlock() && !shouldCancel) {
-    // Read partial block.
-    auto block = data.inputFile.ReadBlock(data.inputFile.GetPartialBlockSize());
+    // Check if file contains a partial block (realSize < SIZE).
+    if (task->data.inputFile.GetSize() % Block::SIZE != 0 && !taskShouldCancel) {
+        // Calculate block size.
+        const auto blockSize = task->data.inputFile.GetSize() % Block::SIZE;
 
-    // Decrypt the block.
-    block.Decrypt(data.key);
+        // Read block from the file.
+        auto block = task->data.inputFile.ReadBlock(blockSize);
 
-    // Store block to the output file.
-    data.outputFile.WriteBlock(block);
-  }
+        // Encrypt the block.
+        block.Encrypt(task->data.key);
 
-  // Notify the main thread about task completition (if it is not aborted).
-  if (!shouldCancel) {
-    wxPostEvent(sink, wxCommandEvent(wxEVT_UPDATE_UI, ID_UPDATE_DONE));
-  }
+        // Store block to the output file.
+        task->data.outputFile.WriteBlock(block);
+
+        // Set progress to 100%, if it is not already set.
+        if (task->progressData.current == 0) {
+            // Notify the main thread about UI update.
+            wxPostEvent(sink, events::UpdateProgress(100));
+        }
+    }
+
+    // Notify the main thread about task completition.
+    wxPostEvent(sink, events::UpdateDone());
 }
