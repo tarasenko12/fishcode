@@ -32,6 +32,8 @@ add_executable(fishcode
     "src/error.hpp"
     "src/events.cpp"
     "src/events.hpp"
+    "src/frame.cpp"
+    "src/frame.hpp"
     "src/file.cpp"
     "src/file.hpp"
     "src/fishcode.cpp"
