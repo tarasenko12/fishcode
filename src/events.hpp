@@ -30,44 +30,29 @@
 namespace fc {
     namespace events {
         enum ControlItemID {
-            ID_CHOOSE = 1,
-            ID_SET,
-            ID_ENCRYPT,
+            ID_CANCEL = 1,
+            ID_CHOOSE,
             ID_DECRYPT,
-            ID_CANCEL
+            ID_ENCRYPT,
+            ID_SET
         };
 
         enum TimerID {
-            ID_READY = ID_CANCEL + 1
+            ID_READY = ID_SET + 1
         };
 
-        enum UpdateEventID {
-            ID_UPDATE_PROGRESS = ID_READY + 1,
-            ID_UPDATE_DONE
+        enum UpdateID {
+            ID_DONE = ID_READY + 1,
+            ID_PROGRESS
         };
 
-        class UpdateProgress : public wxEvent {
-        public:
-            UpdateProgress() = delete;
-            UpdateProgress(const int newProgress);
-            UpdateProgress(const UpdateProgress& otherUpdateProgress) = default;
-            UpdateProgress(UpdateProgress&& otherUpdateProgress) = default;
-
-            UpdateProgress& operator=(const UpdateProgress& otherUpdateProgress) = default;
-            UpdateProgress& operator=(UpdateProgress&& otherUpdateProgress) = default;
-
-            ~UpdateProgress() noexcept override = default;
-
-            inline wxEvent* Clone() const override {
-                return new UpdateProgress(*this);
-            }
-        private:
-            int progress;
+        enum WindowID {
+            ID_FRAME = ID_PROGRESS + 1
         };
 
         class UpdateDone : public wxEvent {
         public:
-            UpdateDone();
+            UpdateDone(const int newID = wxID_ANY);
             UpdateDone(const UpdateDone& otherUpdateDone) = default;
             UpdateDone(UpdateDone&& otherUpdateDone) = default;
 
@@ -80,6 +65,35 @@ namespace fc {
                 return new UpdateDone(*this);
             }
         };
+
+        // Declare this event (UpdateDone) for the wxWidgets.
+        wxDECLARE_EVENT(EVT_UPDATE_DONE, UpdateDone);
+
+        class UpdateProgress : public wxEvent {
+        public:
+            UpdateProgress() = delete;
+            UpdateProgress(const int newID = wxID_ANY, const int newProgress = 0);
+            UpdateProgress(const UpdateProgress& otherUpdateProgress) = default;
+            UpdateProgress(UpdateProgress&& otherUpdateProgress) = default;
+
+            UpdateProgress& operator=(const UpdateProgress& otherUpdateProgress) = default;
+            UpdateProgress& operator=(UpdateProgress&& otherUpdateProgress) = default;
+
+            ~UpdateProgress() noexcept override = default;
+
+            inline wxEvent* Clone() const override {
+                return new UpdateProgress(*this);
+            }
+
+            inline int GetProgress() const noexcept {
+                return progress;
+            }
+        private:
+            int progress;
+        };
+
+        // Declare this event (UpdateProgress) for the wxWidgets.
+        wxDECLARE_EVENT(EVT_UPDATE_PROGRESS, UpdateProgress);
     }
 }
 

@@ -25,13 +25,17 @@
 #include <wx/event.h>
 #include "events.hpp"
 
-fc::events::UpdateProgress::UpdateProgress(const int newProgress)
-: wxEvent(fc::events::ID_UPDATE_PROGRESS, wxEVT_UPDATE_UI) {
-    // Set new progress value.
-    progress = newProgress;
+// Define events.
+wxDEFINE_EVENT(fc::events::EVT_UPDATE_DONE, fc::events::UpdateDone);
+wxDEFINE_EVENT(fc::events::EVT_UPDATE_PROGRESS, fc::events::UpdateProgress);
+
+fc::events::UpdateDone::UpdateDone(const int newID)
+: wxEvent(newID, fc::events::EVT_UPDATE_DONE) {
+
 }
 
-fc::events::UpdateDone::UpdateDone()
-: wxEvent(fc::events::ID_UPDATE_DONE, wxEVT_UPDATE_UI) {
-
+fc::events::UpdateProgress::UpdateProgress(const int newID, const int newProgress)
+: wxEvent(newID, fc::events::EVT_UPDATE_PROGRESS) {
+    // Set new progress value.
+    progress = newProgress;
 }

@@ -64,9 +64,34 @@ using std::unique_ptr;
 // This defines the equivalent of main() for the current platform.
 wxIMPLEMENT_APP(fc::FishCode);
 
+fc::FishCode::FishCode() {
+    // Set pointers to the default value (nullptr).
+    buttonsSizer = nullptr;
+    cancelButton = nullptr;
+    chooseButton = nullptr;
+    decryptButton = nullptr;
+    encryptButton = nullptr;
+    frame = nullptr;
+    inputFileField = nullptr;
+    inputFileLabel = nullptr;
+    inputFileSizer = nullptr;
+    mainSizer = nullptr;
+    menuBar = nullptr;
+    menuMore = nullptr;
+    outputFileField = nullptr;
+    outputFileLabel = nullptr;
+    outputFileSizer = nullptr;
+    passwordField = nullptr;
+    passwordLabel = nullptr;
+    passwordSizer = nullptr;
+    progressBar = nullptr;
+    setButton = nullptr;
+    statusBar = nullptr;
+}
+
 bool fc::FishCode::OnInit() try {
     // Create the main window (frame).
-    frame = new wxFrame(nullptr, wxID_ANY, STR_NAME0);
+    frame = new Frame();
 
     // Create a new menu bar for the frame.
     menuBar = new wxMenuBar();
@@ -119,16 +144,16 @@ bool fc::FishCode::OnInit() try {
 
     // Create context for this sizer.
     inputFileLabel = new wxStaticText(frame, wxID_ANY, STR_LABEL0);
-    inputFileLine = new wxTextCtrl(frame, wxID_ANY);
-    inputFileChooser = new wxButton(frame, events::ID_CHOOSE, STR_LABEL2);
+    inputFileField = new wxTextCtrl(frame, wxID_ANY);
+    chooseButton = new wxButton(frame, events::ID_CHOOSE, STR_LABEL2);
 
     // Configure input file line layout.
-    inputFileLine->SetMinSize(fieldSize);
+    inputFileField->SetMinSize(fieldSize);
 
     // Add context to the sizer.
     inputFileSizer->Add(inputFileLabel, gridLabelSizerFlags);
-    inputFileSizer->Add(inputFileLine, gridSizerFlags);
-    inputFileSizer->Add(inputFileChooser, gridSizerFlags);
+    inputFileSizer->Add(inputFileField, gridSizerFlags);
+    inputFileSizer->Add(chooseButton, gridSizerFlags);
 
     // Set growable columns for this sizer.
     inputFileSizer->AddGrowableCol(1);
@@ -142,16 +167,16 @@ bool fc::FishCode::OnInit() try {
 
     // Create context for this sizer.
     outputFileLabel = new wxStaticText(frame, wxID_ANY, STR_LABEL1);
-    outputFileLine = new wxTextCtrl(frame, wxID_ANY);
-    outputFileSetter = new wxButton(frame, events::ID_SET, STR_LABEL3);
+    outputFileField = new wxTextCtrl(frame, wxID_ANY);
+    setButton = new wxButton(frame, events::ID_SET, STR_LABEL3);
 
     // Configure output file line layout.
-    outputFileLine->SetMinSize(fieldSize);
+    outputFileField->SetMinSize(fieldSize);
 
     // Add context to the sizer.
     outputFileSizer->Add(outputFileLabel, gridLabelSizerFlags);
-    outputFileSizer->Add(outputFileLine, gridSizerFlags);
-    outputFileSizer->Add(outputFileSetter, gridSizerFlags);
+    outputFileSizer->Add(outputFileField, gridSizerFlags);
+    outputFileSizer->Add(setButton, gridSizerFlags);
 
     // Set growable columns for this sizer.
     outputFileSizer->AddGrowableCol(1);
@@ -165,15 +190,15 @@ bool fc::FishCode::OnInit() try {
 
     // Create context for this sizer.
     passwordLabel = new wxStaticText(frame, wxID_ANY, STR_LABEL4);
-    passwordLine = new wxTextCtrl(frame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
+    passwordField = new wxTextCtrl(frame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
 
     // Configure password listener.
-    passwordLine->SetMaxLength(Password::SIZE);
-    passwordLine->SetMinSize(fieldSize);
+    passwordField->SetMaxLength(Password::SIZE);
+    passwordField->SetMinSize(fieldSize);
 
     // Add context to the sizer.
     passwordSizer->Add(passwordLabel, gridLabelSizerFlags);
-    passwordSizer->Add(passwordLine, gridSizerFlags);
+    passwordSizer->Add(passwordField, gridSizerFlags);
 
     // Set growable column for this sizer.
     passwordSizer->AddGrowableCol(1);
@@ -227,14 +252,14 @@ bool fc::FishCode::OnInit() try {
     // Configure event handlers.
     frame->Bind(wxEVT_MENU, &fc::FishCode::OnAbout, this, wxID_ABOUT);
     frame->Bind(wxEVT_MENU, &fc::FishCode::OnHelp, this, wxID_HELP);
-    inputFileChooser->Bind(wxEVT_BUTTON, &fc::FishCode::OnChoose, this, events::ID_CHOOSE);
-    outputFileSetter->Bind(wxEVT_BUTTON, &fc::FishCode::OnSet, this, events::ID_SET);
+    frame->Bind(fc::events::EVT_UPDATE_DONE, &fc::FishCode::OnDoneUpdate, this, fc::events::ID_DONE);
+    frame->Bind(fc::events::EVT_UPDATE_PROGRESS, &fc::FishCode::OnProgressUpdate, this, fc::events::ID_PROGRESS);
+    frame->Bind(wxEVT_TIMER, &fc::FishCode::OnReadyTimer, this, events::ID_READY);
+    chooseButton->Bind(wxEVT_BUTTON, &fc::FishCode::OnChoose, this, events::ID_CHOOSE);
+    setButton->Bind(wxEVT_BUTTON, &fc::FishCode::OnSet, this, events::ID_SET);
     encryptButton->Bind(wxEVT_BUTTON, &fc::FishCode::OnEncrypt, this, events::ID_ENCRYPT);
     decryptButton->Bind(wxEVT_BUTTON, &fc::FishCode::OnDecrypt, this, events::ID_DECRYPT);
     cancelButton->Bind(wxEVT_BUTTON, &fc::FishCode::OnCancel, this, events::ID_CANCEL);
-    frame->Bind(wxEVT_UPDATE_UI, &fc::FishCode::OnProgressUpdate, this, events::ID_UPDATE_PROGRESS);
-    frame->Bind(wxEVT_UPDATE_UI, &fc::FishCode::OnDoneUpdate, this, events::ID_UPDATE_DONE);
-    frame->Bind(wxEVT_TIMER, &fc::FishCode::OnReadyTimer, this, events::ID_READY);
 
     // Show the window.
     frame->Show();
@@ -253,15 +278,17 @@ bool fc::FishCode::OnInit() try {
 }
 
 int fc::FishCode::OnExit() {
-    // Stop the loop (if it is running).
+    // Terminate the task.
     taskShouldCancel = true;
 
     // Wait for the task termination (if there is a task).
-    if (taskThread.joinable()) {
-        taskThread.join();
+    if (taskShouldCancel) {
+        if (taskThread.joinable()) {
+            taskThread.join();
+        }
     }
 
-    // Terminate the program.
+    // Exit the program.
     return 0;
 }
 
@@ -270,14 +297,26 @@ void fc::FishCode::OnAbout(wxCommandEvent& event) {
     wxAboutBox(aboutDialogInfo, frame);
 }
 
-void fc::FishCode::OnHelp(wxCommandEvent& event) {
-    // Display a message box with short documentation.
-    wxMessageBox(
-        STR_DOCUMENTATION,
-        STR_CAPTION0,
-        wxOK | wxCENTRE | wxICON_QUESTION,
-        frame
-    );
+void fc::FishCode::OnCancel(wxCommandEvent& event) {
+    // Disable "Cancel" button.
+    cancelButton->Disable();
+
+    // Enable task abortion.
+    taskShouldCancel = true;
+
+    // Wait for the task termination (if there is a task).
+    if (taskThread.joinable()) {
+        taskThread.join();
+    }
+
+    // Disable task abortion.
+    taskShouldCancel = false;
+
+    // Set new status in the status bar.
+    statusBar->SetStatusText(STR_STATUS2);
+
+    // Start timer to the new status.
+    readyTimer.StartOnce(3000);
 }
 
 void fc::FishCode::OnChoose(wxCommandEvent& event) {
@@ -295,81 +334,7 @@ void fc::FishCode::OnChoose(wxCommandEvent& event) {
     // Check if user has chosen the file.
     if (!filePath.empty()) {
         // Insert file path to the input file line.
-        inputFileLine->ChangeValue(filePath);
-    }
-}
-
-void fc::FishCode::OnSet(wxCommandEvent& event) {
-    // Open file selector.
-    const auto filePath = wxFileSelector(
-        STR_CAPTION2,
-        wxEmptyString,
-        wxEmptyString,
-        wxEmptyString,
-        wxFileSelectorDefaultWildcardStr,
-        wxFD_SAVE,
-        frame
-    );
-
-    // Check if user has set the file.
-    if (!filePath.empty()) {
-        // Insert file path to the output file line.
-        outputFileLine->ChangeValue(filePath);
-    }
-}
-
-void fc::FishCode::OnEncrypt(wxCommandEvent& event) try {
-    // Disable controls.
-    DisableControls();
-
-    // Enable "Cancel" button.
-    cancelButton->Enable();
-
-    // Display new status in the status bar.
-    statusBar->SetStatusText(STR_STATUS3);
-
-    // Get pathes to input and output files.
-    const auto inputFilePath = GetFilePath(inputFileLine);
-    const auto outputFilePath = GetFilePath(outputFileLine);
-
-    // Get user password (as string).
-    const string passwordString = passwordLine->GetValue().utf8_string();
-
-    // Check user data.
-    CheckFileIO(inputFilePath, outputFilePath);
-    //CheckInputFile();
-    //CheckOutputFile();
-    //CheckPassword();
-
-    // Allocate memory for the task.
-    unique_ptr<Task> task;
-
-    // Open the input file.
-    task->SetInputFile(File(inputFilePath, false));
-
-    // Create an output file.
-    task->SetOutputFile(File(outputFilePath));
-
-    // Store user password.
-    task->SetPassword(Password(passwordString));
-
-    // Create new thread for the encryption task.
-    taskThread = thread([this, &task]() {
-        TaskEncrypt(this->frame, std::move(task));
-    });
-
-    // Allow task to continue independently.
-    taskThread.detach();
-} catch (const std::exception& ex) {
-    // Display GUI error message.
-    wxMessageBox(ex.what(), STR_CAPTION4, wxOK | wxCENTRE | wxICON_ERROR, frame);
-
-    // Abort the task.
-    taskShouldCancel = true;
-
-    // Wait for the task termination (if there is a task).
-    if (taskThread.joinable()) {
-        taskThread.join();
+        inputFileField->ChangeValue(filePath);
     }
 }
 
@@ -384,11 +349,11 @@ void fc::FishCode::OnDecrypt(wxCommandEvent& event) try {
     statusBar->SetStatusText(STR_STATUS4);
 
     // Get pathes to input and output files.
-    const auto inputFilePath = GetFilePath(inputFileLine);
-    const auto outputFilePath = GetFilePath(outputFileLine);
+    const auto inputFilePath = GetFilePath(inputFileField);
+    const auto outputFilePath = GetFilePath(outputFileField);
 
     // Get user password (as string).
-    const string passwordString = passwordLine->GetValue().utf8_string();
+    const string passwordString = passwordField->GetValue().utf8_string();
 
     // Check user data.
     CheckFileIO(inputFilePath, outputFilePath);
@@ -419,100 +384,146 @@ void fc::FishCode::OnDecrypt(wxCommandEvent& event) try {
     // Display GUI error message.
     wxMessageBox(ex.what(), STR_CAPTION4, wxOK | wxCENTRE | wxICON_ERROR, frame);
 
-    // Abort the task.
-    taskShouldCancel = true;
-
-    // Wait for the task termination (if there is a task).
-    if (taskThread.joinable()) {
-        taskThread.join();
+    // Abort the task (if it is running).
+    if (!taskShouldCancel) {
+        AbortTask();
     }
 }
 
-void fc::FishCode::OnCancel(wxCommandEvent& event) {
-  // Abort the task.
-  taskShouldCancel = true;
+void fc::FishCode::OnDoneUpdate(fc::events::UpdateDone& event) {
+    // Disable "Cancel" button.
+    cancelButton->Disable();
 
-  // Disable "Cancel" button.
-  cancelButton->Disable();
+    // Set new status in the status bar.
+    statusBar->SetStatusText(STR_STATUS1);
 
-  // Set new status in the status bar.
-  statusBar->SetStatusText(STR_STATUS2);
-
-  // Start timer to the new status.
-  readyTimer.StartOnce(3000);
+    // Start timer to the new status.
+    readyTimer.StartOnce(3000);
 }
 
-void fc::FishCode::OnProgressUpdate(wxCommandEvent& event) {
-  // Update progress value in the progress bar.
-  progressBar->SetValue(progress);
+void fc::FishCode::OnEncrypt(wxCommandEvent& event) try {
+    // Disable controls.
+    DisableControls();
+
+    // Enable "Cancel" button.
+    cancelButton->Enable();
+
+    // Display new status in the status bar.
+    statusBar->SetStatusText(STR_STATUS3);
+
+    // Get pathes to input and output files.
+    const auto inputFilePath = GetFilePath(inputFileField);
+    const auto outputFilePath = GetFilePath(outputFileField);
+
+    // Get user password (as string).
+    const string passwordString = passwordField->GetValue().utf8_string();
+
+    // Check user data.
+    CheckFileIO(inputFilePath, outputFilePath);
+    //CheckInputFile();
+    //CheckOutputFile();
+    //CheckPassword();
+
+    // Allocate memory for the task.
+    unique_ptr<Task> task;
+
+    // Open the input file.
+    task->SetInputFile(File(inputFilePath, false));
+
+    // Create an output file.
+    task->SetOutputFile(File(outputFilePath));
+
+    // Store user password.
+    task->SetPassword(Password(passwordString));
+
+    // Create new thread for the encryption task.
+    taskThread = thread([this, &task]() {
+        TaskEncrypt(this->frame, std::move(task));
+    });
+
+    // Allow task to continue independently.
+    taskThread.detach();
+} catch (const std::exception& ex) {
+    // Display GUI error message.
+    wxMessageBox(ex.what(), STR_CAPTION4, wxOK | wxCENTRE | wxICON_ERROR, frame);
+
+    // Abort the task (if it is running).
+    if (!taskShouldCancel) {
+        AbortTask();
+    }
 }
 
-void fc::FishCode::OnDoneUpdate(wxCommandEvent& event) {
-  // Disable "Cancel" button.
-  cancelButton->Disable();
-
-  // Set new status in the status bar.
-  statusBar->SetStatusText(STR_STATUS1);
-
-  // Set progress in the progress bar to 100%.
-  progressBar->SetValue(100);
-
-  // Start timer to the new status.
-  readyTimer.StartOnce(3000);
+void fc::FishCode::OnHelp(wxCommandEvent& event) {
+    // Display a message box with short documentation.
+    wxMessageBox(
+        STR_DOCUMENTATION,
+        STR_CAPTION0,
+        wxOK | wxCENTRE | wxICON_QUESTION,
+        frame
+    );
 }
 
 void fc::FishCode::OnReadyTimer(wxTimerEvent& event) {
-  // Set default status in the status bar.
-  statusBar->SetStatusText(STR_STATUS0);
+    // Set default status in the status bar.
+    statusBar->SetStatusText(STR_STATUS0);
 
-  // Set progress bar to the default state.
-  progressBar->SetValue(0);
+    // Set progress bar to the default state.
+    progressBar->SetValue(0);
 
-  // Enable controls.
-  EnableControls();
+    // Enable controls.
+    EnableControls();
 }
 
-void fc::FishCode::EnableControls() {
-  // Enable all control items (except "Cancel" button).
-  inputFileLine->Enable();
-  inputFileChooser->Enable();
-  outputFileLine->Enable();
-  outputFileSetter->Enable();
-  passwordLine->Enable();
-  encryptButton->Enable();
-  decryptButton->Enable();
-}
+void fc::FishCode::OnSet(wxCommandEvent& event) {
+    // Open file selector.
+    const auto filePath = wxFileSelector(
+        STR_CAPTION2,
+        wxEmptyString,
+        wxEmptyString,
+        wxEmptyString,
+        wxFileSelectorDefaultWildcardStr,
+        wxFD_SAVE,
+        frame
+    );
 
-void fc::FishCode::DisableControls() {
-  // Disable all control items (except "Cancel" button).
-  inputFileLine->Disable();
-  inputFileChooser->Disable();
-  outputFileLine->Disable();
-  outputFileSetter->Disable();
-  passwordLine->Disable();
-  encryptButton->Disable();
-  decryptButton->Disable();
+    // Check if user has set the file.
+    if (!filePath.empty()) {
+        // Insert file path to the output file line.
+        outputFileField->ChangeValue(filePath);
+    }
 }
 
 std::filesystem::path fc::FishCode::GetFilePath(wxTextCtrl* field) {
-  if (field) {
-    // Get string from the field.
-    const std::string pathString = field->GetValue().utf8_string();
+    if (field) {
+        // Get string from the field.
+        const string pathString = field->GetValue().utf8_string();
 
-    // Check the string.
-    if (pathString.empty()) {
-      // Invalid path.
-      if (fileLine == inputFileLine) {
-        throw InvalidInputFileError();
-      } else {
-        throw InvalidOutputFileError();
-      }
+        // Construct the new path object and return it.
+        return std::filesystem::path(pathString);
+    } else {
+        // Invalid field pointer.
+        throw std::invalid_argument("Invalid pointer for GetFilePath()!");
     }
+}
 
-    // Construct the new path object and return it.
-    return std::filesystem::path(pathString);
-  } else {
-    // Invalid file line pointer.
-    throw std::invalid_argument("Invalid pointer for GetFilePath()!");
-  }
+void fc::FishCode::DisableControls() {
+    // Disable all control items (except "Cancel" button).
+    inputFileField->Disable();
+    chooseButton->Disable();
+    outputFileField->Disable();
+    setButton->Disable();
+    passwordField->Disable();
+    encryptButton->Disable();
+    decryptButton->Disable();
+}
+
+void fc::FishCode::EnableControls() {
+    // Enable all control items (except "Cancel" button).
+    inputFileField->Enable();
+    chooseButton->Enable();
+    outputFileField->Enable();
+    setButton->Enable();
+    passwordField->Enable();
+    encryptButton->Enable();
+    decryptButton->Enable();
 }

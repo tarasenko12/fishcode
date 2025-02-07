@@ -55,12 +55,6 @@ void fc::TaskDecrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task>&& task) {
 
     // Decrypt the input file by blocks.
     for (size_t counter = 0; counter < task->progressData.total; counter++, task->progressData.current++) {
-        // Check for task abortion.
-        if (taskShouldCancel) {
-            // Stop the loop.
-            break;
-        }
-
         // Read one block from the file.
         auto block = task->data.inputFile.ReadBlock();
 
@@ -70,8 +64,17 @@ void fc::TaskDecrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task>&& task) {
         // Store block to the output file.
         task->data.outputFile.WriteBlock(block);
 
-        // Notify the main thread about UI update.
-        wxPostEvent(sink, events::UpdateProgress(task->progressData.current / task->progressData.total * 100));
+        // Check for task abortion.
+        if (taskShouldCancel) {
+            // Stop the loop.
+            break;
+        } else {
+            // Notify the main thread about UI update.
+            wxPostEvent(sink, events::UpdateProgress(
+                fc::events::ID_PROGRESS,
+                task->progressData.current / task->progressData.total * 100)
+            );
+        }
     }
 
     // Check if file contains a partial block (realSize < SIZE).
@@ -91,12 +94,14 @@ void fc::TaskDecrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task>&& task) {
         // Set progress to 100%, if it is not already set.
         if (task->progressData.current == 0) {
             // Notify the main thread about UI update.
-            wxPostEvent(sink, events::UpdateProgress(100));
+            wxPostEvent(sink, events::UpdateProgress(fc::events::ID_PROGRESS, 100));
         }
     }
 
-    // Notify the main thread about task completition.
-    wxPostEvent(sink, events::UpdateDone());
+    // Notify the main thread about task completition (if it is not aborted).
+    if (!taskShouldCancel) {
+        wxPostEvent(sink, events::UpdateDone(fc::events::ID_DONE));
+    }
 }
 
 void fc::TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task>&& task) {
@@ -117,12 +122,6 @@ void fc::TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task>&& task) {
 
     // Encrypt the input file by blocks.
     for (size_t counter = 0; counter < task->progressData.total; counter++, task->progressData.current++) {
-        // Check for task abortion.
-        if (taskShouldCancel) {
-            // Stop the loop.
-            break;
-        }
-
         // Read one block from the file.
         auto block = task->data.inputFile.ReadBlock();
 
@@ -132,8 +131,17 @@ void fc::TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task>&& task) {
         // Store block to the output file.
         task->data.outputFile.WriteBlock(block);
 
-        // Notify the main thread about UI update.
-        wxPostEvent(sink, events::UpdateProgress(task->progressData.current / task->progressData.total * 100));
+        // Check for task abortion.
+        if (taskShouldCancel) {
+            // Stop the loop.
+            break;
+        } else {
+            // Notify the main thread about UI update.
+            wxPostEvent(sink, events::UpdateProgress(
+                fc::events::ID_PROGRESS,
+                task->progressData.current / task->progressData.total * 100)
+            );
+        }
     }
 
     // Check if file contains a partial block (realSize < SIZE).
@@ -153,10 +161,12 @@ void fc::TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task>&& task) {
         // Set progress to 100%, if it is not already set.
         if (task->progressData.current == 0) {
             // Notify the main thread about UI update.
-            wxPostEvent(sink, events::UpdateProgress(100));
+            wxPostEvent(sink, events::UpdateProgress(fc::events::ID_PROGRESS, 100));
         }
     }
 
-    // Notify the main thread about task completition.
-    wxPostEvent(sink, events::UpdateDone());
+    // Notify the main thread about task completition (if it is not aborted).
+    if (!taskShouldCancel) {
+        wxPostEvent(sink, events::UpdateDone(fc::events::ID_DONE));
+    }
 }

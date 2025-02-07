@@ -31,7 +31,6 @@
 #include <wx/app.h>
 #include <wx/button.h>
 #include <wx/event.h>
-#include <wx/frame.h>
 #include <wx/gauge.h>
 #include <wx/menu.h>
 #include <wx/sizer.h>
@@ -40,6 +39,7 @@
 #include <wx/textctrl.h>
 #include <wx/timer.h>
 #include "events.hpp"
+#include "frame.hpp"
 #include "task.hpp"
 
 namespace fc {
@@ -58,45 +58,56 @@ namespace fc {
         int OnExit() override;
     private:
         std::thread taskThread;
-        wxFrame* frame;
+
+        wxAboutDialogInfo aboutDialogInfo;
+        wxGridSizer* buttonsSizer;
+        wxButton* cancelButton;
+        wxButton* chooseButton;
+        wxButton* decryptButton;
+        wxButton* encryptButton;
+        Frame* frame;
+        wxTextCtrl* inputFileField;
+        wxStaticText* inputFileLabel;
+        wxFlexGridSizer* inputFileSizer;
+        wxBoxSizer* mainSizer;
         wxMenuBar* menuBar;
         wxMenu* menuMore;
-        wxStatusBar* statusBar;
-        wxAboutDialogInfo aboutDialogInfo;
-        wxBoxSizer* mainSizer;
-        wxFlexGridSizer* inputFileSizer;
-        wxFlexGridSizer* outputFileSizer;
-        wxFlexGridSizer* passwordSizer;
-        wxGridSizer* buttonsSizer;
-        wxStaticText* inputFileLabel;
+        wxTextCtrl* outputFileField;
         wxStaticText* outputFileLabel;
+        wxFlexGridSizer* outputFileSizer;
+        wxTextCtrl* passwordField;
         wxStaticText* passwordLabel;
-        wxTextCtrl* inputFileLine;
-        wxTextCtrl* outputFileLine;
-        wxTextCtrl* passwordLine;
-        wxButton* inputFileChooser;
-        wxButton* outputFileSetter;
-        wxButton* encryptButton;
-        wxButton* decryptButton;
-        wxButton* cancelButton;
+        wxFlexGridSizer* passwordSizer;
         wxGauge* progressBar;
         wxTimer readyTimer;
+        wxButton* setButton;
+        wxStatusBar* statusBar;
 
         void OnAbout(wxCommandEvent& event);
-        void OnHelp(wxCommandEvent& event);
-        void OnChoose(wxCommandEvent& event);
-        void OnSet(wxCommandEvent& event);
-        void OnEncrypt(wxCommandEvent& event);
-        void OnDecrypt(wxCommandEvent& event);
         void OnCancel(wxCommandEvent& event);
-        void OnProgressUpdate(events::UpdateProgress& event);
+        void OnChoose(wxCommandEvent& event);
+        void OnDecrypt(wxCommandEvent& event);
         void OnDoneUpdate(events::UpdateDone& event);
+        void OnEncrypt(wxCommandEvent& event);
+        void OnHelp(wxCommandEvent& event);
+
+        inline void OnProgressUpdate(events::UpdateProgress& event) {
+            // Update progress value in the progress bar.
+            progressBar->SetValue(event.GetProgress());
+        }
+
         void OnReadyTimer(wxTimerEvent& event);
+        void OnSet(wxCommandEvent& event);
 
         std::filesystem::path GetFilePath(wxTextCtrl* field);
 
-        void EnableControls();
+        inline void AbortTask() {
+            // Send a message to abort the task.
+            wxPostEvent(cancelButton, wxCommandEvent(wxEVT_BUTTON, events::ID_CANCEL));
+        }
+
         void DisableControls();
+        void EnableControls();
     };
 }
 
