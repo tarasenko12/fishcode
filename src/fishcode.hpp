@@ -25,22 +25,11 @@
 #ifndef FISHCODE_HPP
 #define FISHCODE_HPP
 
-#include <filesystem>
-#include <thread>
 #include <wx/aboutdlg.h>
 #include <wx/app.h>
-#include <wx/button.h>
-#include <wx/event.h>
-#include <wx/gauge.h>
-#include <wx/menu.h>
-#include <wx/sizer.h>
-#include <wx/stattext.h>
-#include <wx/statusbr.h>
-#include <wx/textctrl.h>
 #include <wx/timer.h>
 #include "events.hpp"
 #include "frame.hpp"
-#include "task.hpp"
 
 namespace fc {
     class FishCode : public wxApp {
@@ -55,33 +44,6 @@ namespace fc {
         ~FishCode() noexcept override = default;
 
         bool OnInit() override;
-        int OnExit() override;
-    private:
-        std::thread taskThread;
-
-        wxAboutDialogInfo aboutDialogInfo;
-        wxGridSizer* buttonsSizer;
-        wxButton* cancelButton;
-        wxButton* chooseButton;
-        wxButton* decryptButton;
-        wxButton* encryptButton;
-        Frame* frame;
-        wxTextCtrl* inputFileField;
-        wxStaticText* inputFileLabel;
-        wxFlexGridSizer* inputFileSizer;
-        wxBoxSizer* mainSizer;
-        wxMenuBar* menuBar;
-        wxMenu* menuMore;
-        wxTextCtrl* outputFileField;
-        wxStaticText* outputFileLabel;
-        wxFlexGridSizer* outputFileSizer;
-        wxTextCtrl* passwordField;
-        wxStaticText* passwordLabel;
-        wxFlexGridSizer* passwordSizer;
-        wxGauge* progressBar;
-        wxTimer readyTimer;
-        wxButton* setButton;
-        wxStatusBar* statusBar;
 
         void OnAbout(wxCommandEvent& event);
         void OnCancel(wxCommandEvent& event);
@@ -90,16 +52,17 @@ namespace fc {
         void OnDoneUpdate(events::UpdateDone& event);
         void OnEncrypt(wxCommandEvent& event);
         void OnHelp(wxCommandEvent& event);
+        void OnReadyTimer(wxTimerEvent& event);
+        void OnSet(wxCommandEvent& event);
+    private:
+        wxAboutDialogInfo aboutDialogInfo;
+
+        Frame* frame;
 
         inline void OnProgressUpdate(events::UpdateProgress& event) {
             // Update progress value in the progress bar.
             progressBar->SetValue(event.GetProgress());
         }
-
-        void OnReadyTimer(wxTimerEvent& event);
-        void OnSet(wxCommandEvent& event);
-
-        std::filesystem::path GetFilePath(wxTextCtrl* field);
 
         inline void AbortTask() {
             // Send a message to abort the task.

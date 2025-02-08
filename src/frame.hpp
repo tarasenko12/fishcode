@@ -25,7 +25,16 @@
 #ifndef FISHCODE_FRAME_HPP
 #define FISHCODE_FRAME_HPP
 
+#include <array>
+#include <memory>
+#include <thread>
+#include <wx/event.h>
 #include <wx/frame.h>
+#include <wx/sizer.h>
+#include <wx/string.h>
+#include "button.hpp"
+#include "field.hpp"
+#include "label.hpp"
 
 namespace fc {
     class Frame : public wxFrame {
@@ -38,6 +47,60 @@ namespace fc {
         Frame& operator=(Frame&& otherFrame) = delete;
 
         ~Frame() noexcept override = default;
+
+        void OnClose(wxCloseEvent& event) override;
+
+        inline wxString GetIFPathValue() const noexcept {
+            return fields[0]->GetValue();
+        }
+
+        inline wxString GetOFPathValue() const noexcept {
+            return fields[1]->GetValue();
+        }
+
+        inline wxString GetPasswordValue() const noexcept {
+            return fields[2]->GetValue();
+        }
+
+        inline void SetIFPathValue(const wxString& newValue) noexcept {
+            fields[0]->ChangeValue(newValue);
+        }
+
+        inline void SetOFPathValue(const wxString& newValue) noexcept {
+            fields[1]->ChangeValue(newValue);
+        }
+
+        inline void ConnectTask(const std::shared_ptr<std::thread>& newTaskThread) {
+            taskThread = newTaskThread;
+        }
+
+        inline void DisableCancelButton() noexcept {
+            buttons[4]->Disable();
+        }
+
+        void DisableButtons() noexcept;
+        void DisableFields() noexcept;
+
+        inline void DisableProgressBar() noexcept {
+            progressBar->Disable();
+        }
+
+        inline void EnableCancelButton() noexcept {
+            buttons[4]->Enable();
+        }
+
+        void EnableButtons() noexcept;
+        void EnableFields() noexcept;
+
+        inline void EnableProgressBar() noexcept {
+            progressBar->Enable();
+        }
+    private:
+        std::array<Button*, 5> buttons;
+        std::array<Field*, 3> fields;
+        std::array<Label*, 3> labels;
+        std::shared_ptr<std::thread> taskThread;
+        ProgressBar* progressBar;
     };
 }
 

@@ -31,20 +31,9 @@
 #include <thread>
 #include <utility>
 #include <cstddef>
-#include <wx/aboutdlg.h>
-#include <wx/button.h>
 #include <wx/event.h>
 #include <wx/filedlg.h>
-#include <wx/frame.h>
-#include <wx/gauge.h>
-#include <wx/gdicmn.h>
-#include <wx/menu.h>
 #include <wx/msgdlg.h>
-#include <wx/sizer.h>
-#include <wx/stattext.h>
-#include <wx/statusbr.h>
-#include <wx/string.h>
-#include <wx/textctrl.h>
 #include <wx/timer.h>
 #include "block.hpp"
 #include "error.hpp"
@@ -87,36 +76,6 @@ fc::FishCode::FishCode() {
     progressBar = nullptr;
     setButton = nullptr;
     statusBar = nullptr;
-}
-
-bool fc::FishCode::OnInit() try {
-    // Create the main window (frame).
-    frame = new Frame();
-
-    // Create a new menu bar for the frame.
-    menuBar = new wxMenuBar();
-
-    // Initialize menu bar menu(s).
-    menuMore = new wxMenu();
-
-    // Initialize menuMore items and append them to the menu.
-    menuMore->Append(wxID_ABOUT, STR_NAME2, STR_PROMPT0);
-    menuMore->Append(wxID_HELP, STR_NAME3, STR_PROMPT1);
-
-    // Append menu(s) to the menu bar.
-    menuBar->Append(menuMore, STR_NAME1);
-
-    // Connect menu bar to the frame.
-    frame->SetMenuBar(menuBar);
-
-    // Create a new status bar for the frame.
-    statusBar = new wxStatusBar(frame);
-
-    // Set the default status.
-    statusBar->SetStatusText(STR_STATUS0);
-
-    // Add this status bar to the frame.
-    frame->SetStatusBar(statusBar);
 
     // Configure the about dialog.
     aboutDialogInfo.SetName(STR_NAME0);
@@ -124,127 +83,11 @@ bool fc::FishCode::OnInit() try {
     aboutDialogInfo.SetDescription(STR_DESCRYPTION);
     aboutDialogInfo.SetCopyright(STR_COPYRIGHT);
     aboutDialogInfo.AddDeveloper(STR_DEVELOPER);
+}
 
-    // Initialize new sizer for the main window.
-    mainSizer = new wxBoxSizer(wxVERTICAL);
-
-    // Configure grid sizers layout.
-    const wxSize gridLayout(5, 5);
-
-    // Configure sizers (using flags).
-    const auto mainSizerFlags = wxSizerFlags().Expand().Border(wxALL, 5);
-    const auto gridSizerFlags = wxSizerFlags().Expand().Border(wxALL, 10);
-    const auto gridLabelSizerFlags = wxSizerFlags().Center().Right().Border(wxALL, 2);
-
-    // Set layout for the fields.
-    const wxSize fieldSize(400, 45);
-
-    // Create sizer for the input file chooser.
-    inputFileSizer = new wxFlexGridSizer(1, 3, gridLayout);
-
-    // Create context for this sizer.
-    inputFileLabel = new wxStaticText(frame, wxID_ANY, STR_LABEL0);
-    inputFileField = new wxTextCtrl(frame, wxID_ANY);
-    chooseButton = new wxButton(frame, events::ID_CHOOSE, STR_LABEL2);
-
-    // Configure input file line layout.
-    inputFileField->SetMinSize(fieldSize);
-
-    // Add context to the sizer.
-    inputFileSizer->Add(inputFileLabel, gridLabelSizerFlags);
-    inputFileSizer->Add(inputFileField, gridSizerFlags);
-    inputFileSizer->Add(chooseButton, gridSizerFlags);
-
-    // Set growable columns for this sizer.
-    inputFileSizer->AddGrowableCol(1);
-    inputFileSizer->AddGrowableCol(2);
-
-    // Connect main sizer with this sizer.
-    mainSizer->Add(inputFileSizer, mainSizerFlags);
-
-    // Create sizer for the output file setter.
-    outputFileSizer = new wxFlexGridSizer(1, 3, gridLayout);
-
-    // Create context for this sizer.
-    outputFileLabel = new wxStaticText(frame, wxID_ANY, STR_LABEL1);
-    outputFileField = new wxTextCtrl(frame, wxID_ANY);
-    setButton = new wxButton(frame, events::ID_SET, STR_LABEL3);
-
-    // Configure output file line layout.
-    outputFileField->SetMinSize(fieldSize);
-
-    // Add context to the sizer.
-    outputFileSizer->Add(outputFileLabel, gridLabelSizerFlags);
-    outputFileSizer->Add(outputFileField, gridSizerFlags);
-    outputFileSizer->Add(setButton, gridSizerFlags);
-
-    // Set growable columns for this sizer.
-    outputFileSizer->AddGrowableCol(1);
-    outputFileSizer->AddGrowableCol(2);
-
-    // Connect main sizer with this sizer.
-    mainSizer->Add(outputFileSizer, mainSizerFlags);
-
-    // Create sizer for password listener.
-    passwordSizer = new wxFlexGridSizer(1, 2, gridLayout);
-
-    // Create context for this sizer.
-    passwordLabel = new wxStaticText(frame, wxID_ANY, STR_LABEL4);
-    passwordField = new wxTextCtrl(frame, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
-
-    // Configure password listener.
-    passwordField->SetMaxLength(Password::SIZE);
-    passwordField->SetMinSize(fieldSize);
-
-    // Add context to the sizer.
-    passwordSizer->Add(passwordLabel, gridLabelSizerFlags);
-    passwordSizer->Add(passwordField, gridSizerFlags);
-
-    // Set growable column for this sizer.
-    passwordSizer->AddGrowableCol(1);
-
-    // Connect main sizer with this sizer.
-    mainSizer->Add(passwordSizer, mainSizerFlags);
-
-    // Create a progress bar (0% - 100%).
-    progressBar = new wxGauge(
-        frame,
-        wxID_ANY,
-        100,
-        wxDefaultPosition,
-        wxDefaultSize,
-        wxGA_HORIZONTAL | wxGA_PROGRESS
-    );
-
-    // Configure progress bar size.
-    progressBar->SetMinSize(wxSize(400, 15));
-
-    // Add progress bar to the main sizer.
-    mainSizer->Add(progressBar, mainSizerFlags);
-
-    // Create sizer for the main control buttons.
-    buttonsSizer = new wxGridSizer(1, 2, gridLayout);
-
-    // Create main control buttons.
-    encryptButton = new wxButton(frame, events::ID_ENCRYPT, STR_LABEL5);
-    decryptButton = new wxButton(frame, events::ID_DECRYPT, STR_LABEL6);
-    cancelButton = new wxButton(frame, events::ID_CANCEL, STR_LABEL7);
-
-    // Disable "Cancel" button for now.
-    cancelButton->Disable();
-
-    // Add some buttons to the sizer.
-    buttonsSizer->Add(encryptButton, gridSizerFlags);
-    buttonsSizer->Add(decryptButton, gridSizerFlags);
-
-    // Connect this sizer to the main sizer.
-    mainSizer->Add(buttonsSizer, mainSizerFlags);
-
-    // Add "Cancel" button to the main sizer.
-    mainSizer->Add(cancelButton, mainSizerFlags);
-
-    // Connect main window (frame) with sizer.
-    frame->SetSizerAndFit(mainSizer);
+bool fc::FishCode::OnInit() try {
+    // Create the main window (frame).
+    frame = new Frame();
 
     // Configure timer.
     readyTimer.SetOwner(frame, events::ID_READY);
@@ -277,21 +120,6 @@ bool fc::FishCode::OnInit() try {
     return false;
 }
 
-int fc::FishCode::OnExit() {
-    // Terminate the task.
-    taskShouldCancel = true;
-
-    // Wait for the task termination (if there is a task).
-    if (taskShouldCancel) {
-        if (taskThread.joinable()) {
-            taskThread.join();
-        }
-    }
-
-    // Exit the program.
-    return 0;
-}
-
 void fc::FishCode::OnAbout(wxCommandEvent& event) {
     // Show about box.
     wxAboutBox(aboutDialogInfo, frame);
@@ -299,7 +127,7 @@ void fc::FishCode::OnAbout(wxCommandEvent& event) {
 
 void fc::FishCode::OnCancel(wxCommandEvent& event) {
     // Disable "Cancel" button.
-    cancelButton->Disable();
+    frame->DisableCancelButton();
 
     // Enable task abortion.
     taskShouldCancel = true;
@@ -313,7 +141,7 @@ void fc::FishCode::OnCancel(wxCommandEvent& event) {
     taskShouldCancel = false;
 
     // Set new status in the status bar.
-    statusBar->SetStatusText(STR_STATUS2);
+    frame->SetStatusText(STR_STATUS2);
 
     // Start timer to the new status.
     readyTimer.StartOnce(3000);
@@ -334,26 +162,30 @@ void fc::FishCode::OnChoose(wxCommandEvent& event) {
     // Check if user has chosen the file.
     if (!filePath.empty()) {
         // Insert file path to the input file line.
-        inputFileField->ChangeValue(filePath);
+        frame->SetIFPathValue(filePath);
     }
 }
 
 void fc::FishCode::OnDecrypt(wxCommandEvent& event) try {
     // Disable controls.
-    DisableControls();
+    frame->DisableButtons();
+    frame->DisableFields();
+
+    // Enable progress bar.
+    frame->EnableProgressBar();
 
     // Enable "Cancel" button.
-    cancelButton->Enable();
+    frame->EnableCancelButton();
 
     // Display new status in the status bar.
-    statusBar->SetStatusText(STR_STATUS4);
+    frame->SetStatusText(STR_STATUS4);
 
     // Get pathes to input and output files.
     const auto inputFilePath = GetFilePath(inputFileField);
     const auto outputFilePath = GetFilePath(outputFileField);
 
     // Get user password (as string).
-    const string passwordString = passwordField->GetValue().utf8_string();
+    const string passwordString = frame->GetPasswordValue().utf8_string();
 
     // Check user data.
     CheckFileIO(inputFilePath, outputFilePath);
@@ -374,7 +206,7 @@ void fc::FishCode::OnDecrypt(wxCommandEvent& event) try {
     task->SetPassword(Password(passwordString));
 
     // Create new thread for the encryption task.
-    taskThread = std::thread([this, &task]() {
+    shared_ptr<taskThread> = make_shared<std::thread>([this, &task]() {
         TaskDecrypt(this->frame, std::move(task));
     });
 
@@ -392,10 +224,10 @@ void fc::FishCode::OnDecrypt(wxCommandEvent& event) try {
 
 void fc::FishCode::OnDoneUpdate(fc::events::UpdateDone& event) {
     // Disable "Cancel" button.
-    cancelButton->Disable();
+    frame->DisableCancelButton();
 
     // Set new status in the status bar.
-    statusBar->SetStatusText(STR_STATUS1);
+    frame->SetStatusText(STR_STATUS1);
 
     // Start timer to the new status.
     readyTimer.StartOnce(3000);
@@ -490,19 +322,6 @@ void fc::FishCode::OnSet(wxCommandEvent& event) {
     if (!filePath.empty()) {
         // Insert file path to the output file line.
         outputFileField->ChangeValue(filePath);
-    }
-}
-
-std::filesystem::path fc::FishCode::GetFilePath(wxTextCtrl* field) {
-    if (field) {
-        // Get string from the field.
-        const string pathString = field->GetValue().utf8_string();
-
-        // Construct the new path object and return it.
-        return std::filesystem::path(pathString);
-    } else {
-        // Invalid field pointer.
-        throw std::invalid_argument("Invalid pointer for GetFilePath()!");
     }
 }
 
