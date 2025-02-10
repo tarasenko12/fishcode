@@ -22,11 +22,29 @@
 ** See <https://www.wxwidgets.org/about/licence/>.
 */
 
-#include <wx/event.>
+#include <exception>
+#include <memory>
+#include <thread>
+#include <utility>
+#include <wx/aboutdlg.h>
+#include <wx/event.h>
+#include <wx/filedlg.h>
 #include <wx/frame.h>
+#include <wx/menu.h>
+#include <wx/msgdlg.h>
+#include <wx/sizer.h>
+#include <wx/timer.h>
 #include "events.hpp"
 #include "frame.hpp"
+#include "progress.hpp"
 #include "strings.hpp"
+#include "task.hpp"
+
+using std::exception;
+using std::make_unique;
+using std::move;
+using std::thread;
+using std::unique_ptr;
 
 fc::Frame::Frame()
 : wxFrame(nullptr, fc::events::ID_FRAME, STR_NAME0) {
@@ -39,6 +57,10 @@ fc::Frame::Frame()
 
     // Connect menu bar to the frame.
     SetMenuBar(menuBar);
+
+    // Configure menu bar event handlers.
+    Bind(wxEVT_MENU, &fc::Frame::OnAbout, this, wxID_ABOUT);
+    Bind(wxEVT_MENU, &fc::Frame::OnHelp, this, wxID_HELP);
 
     // Create and set new status bar for the frame.
     SetStatusBar(CreateStatusBar());
@@ -60,13 +82,12 @@ fc::Frame::Frame()
     // Set layout for the fields.
     const wxSize fieldSize(400, 45);
 
-
     // Configure UI sizers.
-    auto sizers[] = {
-        new wxFlexGridSizer(1, 3, gridLayout);
-        new wxFlexGridSizer(1, 3, gridLayout);
-        new wxFlexGridSizer(1, 2, gridLayout);
-        new wxFlexGridSizer(1, 2, gridLayout);
+    auto* sizers[] = {
+        new wxFlexGridSizer(1, 3, gridLayout),
+        new wxFlexGridSizer(1, 3, gridLayout),
+        new wxFlexGridSizer(1, 2, gridLayout),
+        new wxFlexGridSizer(1, 2, gridLayout),
     };
     sizers[0]->AddGrowableCol(1);
     sizers[0]->AddGrowableCol(2);
@@ -112,6 +133,13 @@ fc::Frame::Frame()
     mainSizer->Add(sizers[1], mainSizerFlags);
     mainSizer->Add(sizers[3], mainSizerFlags);
 
+    // Set up button event handlers.
+    buttons[0]->Bind(wxEVT_BUTTON, &fc::Frame::OnChoose, this, events::ID_CHOOSE);
+    buttons[1]->Bind(wxEVT_BUTTON, &fc::Frame::OnSet, this, events::ID_SET);
+    buttons[2]->Bind(wxEVT_BUTTON, &fc::Frame::OnEncrypt, this, events::ID_ENCRYPT);
+    buttons[3]->Bind(wxEVT_BUTTON, &fc::Frame::OnDecrypt, this, events::ID_DECRYPT);
+    buttons[4]->Bind(wxEVT_BUTTON, &fc::Frame::OnCancel, this, events::ID_CANCEL);
+
     // Create a progress bar.
     progressBar = new ProgressBar(this);
 
@@ -126,6 +154,239 @@ fc::Frame::Frame()
 
     // Connect main window (frame) with its sizer.
     SetSizerAndFit(mainSizer);
+
+    // Create and configure timer.
+    readyTimer = make_unique<wxTimer>(this, events::ID_READY);
+
+    // Configure timer event handler.
+    Bind(wxEVT_TIMER, &fc::Frame::OnReadyTimer, this, events::ID_READY);
+
+    // Set up status update handlers.
+    Bind(events::EVT_UPDATE_DONE, &fc::Frame::OnDoneUpdate, this, events::ID_DONE);
+    Bind(events::EVT_UPDATE_PROGRESS, &fc::Frame::OnProgressUpdate, this, events::ID_PROGRESS);
+}
+
+void fc::Frame::OnClose(wxCloseEvent& event) {
+    // Abort the task (if it is running).
+    taskShouldCancel = true;
+
+    // Wait for the task termination.
+    if (taskThread->joinable()) {
+        taskThread->join();
+    }
+
+    // Destroy window (frame) and all of its subwindows.
+    Destroy();
+}
+
+void fc::Frame::OnAbout(wxCommandEvent& event) {
+    // Configure the about dialog.
+    wxAboutDialogInfo aboutDialogInfo;
+    aboutDialogInfo.SetName(STR_NAME0);
+    aboutDialogInfo.SetVersion(STR_VERSION);
+    aboutDialogInfo.SetDescription(STR_DESCRYPTION);
+    aboutDialogInfo.SetCopyright(STR_COPYRIGHT);
+    aboutDialogInfo.AddDeveloper(STR_DEVELOPER);
+
+    // Show about box.
+    wxAboutBox(aboutDialogInfo, this);
+}
+
+void fc::Frame::OnCancel(wxCommandEvent& event) {
+    // Disable "Cancel" button.
+    DisableCancelButton();
+
+    // Enable task abortion.
+    taskShouldCancel = true;
+
+    // Wait for the task termination (if there is a task).
+    if (taskThread->joinable()) {
+        taskThread->join();
+    }
+
+    // Disable task abortion.
+    taskShouldCancel = false;
+
+    // Set new status in the status bar.
+    SetStatusText(STR_STATUS2);
+
+    // Start timer to the new status.
+    readyTimer->StartOnce(3000);
+}
+
+void fc::Frame::OnChoose(wxCommandEvent& event) {
+    // Open file selector.
+    const auto filePath = wxFileSelector(
+        STR_CAPTION1,
+        wxEmptyString,
+        wxEmptyString,
+        wxEmptyString,
+        wxFileSelectorDefaultWildcardStr,
+        wxFD_OPEN,
+        this
+    );
+
+    // Check if user has chosen the file.
+    if (!filePath.empty()) {
+        // Insert file path to the input field.
+        SetIFPathValue(filePath);
+    }
+}
+
+void fc::Frame::OnDecrypt(wxCommandEvent& event) try {
+    // Set frame to the "processing" mode.
+    DisableButtons();
+    DisableFields();
+    EnableCancelButton();
+    EnableProgressBar();
+
+    // Display new status in the status bar.
+    SetStatusText(STR_STATUS4);
+
+    // Get pathes to input and output files.
+    const auto ifPath = GetIFPathValue();
+    const auto ofPath = GetOFPathValue();
+
+    // Get user password (as string).
+    const auto passwordString = GetPasswordValue();
+
+    // Check user data.
+    CheckFileIO(ifPath.utf8_string(), ofPath.utf8_string());
+    const auto inputFile = CheckInputFile(ifPath.utf8_string(), true);
+    const auto outputFile = CheckOutputFile(ofPath.utf8_string());
+    const auto password = CheckPassword(password.utf8_string());
+
+    // Allocate memory for the task.
+    unique_ptr<Task> task;
+
+    // Open the input file.
+    task->SetInputFile(inputFile);
+
+    // Create an output file.
+    task->SetOutputFile(outputFile);
+
+    // Store user password.
+    task->SetPassword(password);
+
+    // Create new thread for the encryption task.
+    taskThread = make_unique<thread>([this, &task]() {
+        TaskDecrypt(this, move(task));
+    });
+
+    // Allow task to run independently.
+    taskThread.detach();
+} catch (const exception& ex) {
+    // Send a message about the task abortion.
+    wxPostMessage(buttons[4], wxCommandEvent(wxEVT_BUTTON, events::ID_CANCEL));
+
+    // Display GUI error message.
+    wxMessageBox(ex.what(), STR_CAPTION4, wxOK | wxCENTRE | wxICON_ERROR, this);
+}
+
+void fc::Frame::OnDoneUpdate(fc::events::UpdateDone& event) {
+    // Disable "Cancel" button.
+    DisableCancelButton();
+
+    // Set new status in the status bar.
+    SetStatusText(STR_STATUS1);
+
+    // Start timer to the new status.
+    readyTimer->StartOnce(3000);
+}
+
+void fc::Frame::OnEncrypt(wxCommandEvent& event) try {
+    // Set frame to the "processing" mode.
+    DisableButtons();
+    DisableFields();
+    EnableCancelButton();
+    EnableProgressBar();
+
+    // Display new status in the status bar.
+    statusBar->SetStatusText(STR_STATUS3);
+
+    // Get pathes to input and output files.
+    const auto ifPath = GetIFPathValue();
+    const auto ofPath = GetOFPathValue();
+
+    // Get user password (as string).
+    const auto password = GetPasswordValue();
+
+    // Check user data.
+    CheckFileIO(ifPath.utf8_string(), ofPath.utf8_string());
+    const auto inputFile = CheckInputFile(ifPath.utf8_string(), false);
+    const auto outputFile = CheckOutputFile(ofPath.utf8_string());
+    const auto password = CheckPassword(password.utf8_string());
+
+    // Allocate memory for the task.
+    unique_ptr<Task> task;
+
+    // Open the input file.
+    task->SetInputFile(inputFile);
+
+    // Create an output file.
+    task->SetOutputFile(outputFile);
+
+    // Store user password.
+    task->SetPassword(password);
+
+    // Create new thread for the encryption task.
+    taskThread = make_unique<thread>([this, &task]() {
+        TaskEncrypt(this, move(task));
+    });
+
+    // Allow task to run independently.
+    taskThread.detach();
+} catch (const exception& ex) {
+    // Send a message about the task abortion.
+    wxPostMessage(buttons[4], wxCommandEvent(wxEVT_BUTTON, events::ID_CANCEL));
+
+    // Display GUI error message.
+    wxMessageBox(ex.what(), STR_CAPTION4, wxOK | wxCENTRE | wxICON_ERROR, this);
+}
+
+void fc::Frame::OnHelp(wxCommandEvent& event) {
+    // Display a message box with short documentation.
+    wxMessageBox(STR_DOCUMENTATION, STR_CAPTION0, wxOK | wxCENTRE | wxICON_QUESTION, this);
+}
+
+void fc::Frame::OnProgressUpdate(fc::events::ProgressUpdate& event) {
+    // Set new value in the progress bar.
+    progressBar->SetValue(event.GetProgress());
+
+    // Notify user about progress update.
+    progressBar->Pulse();
+}
+
+void fc::Frame::OnReadyTimer(wxTimerEvent& event) {
+    // Set default status in the status bar.
+    SetStatusText(STR_STATUS0);
+
+    // Set progress bar to the default state.
+    progressBar->SetValue(0);
+
+    // Set frame to the default state.
+    EnableButtons();
+    EnableFields();
+    DisableProgressBar();
+}
+
+void fc::Frame::OnSet(wxCommandEvent& event) {
+    // Open file selector.
+    const auto filePath = wxFileSelector(
+        STR_CAPTION2,
+        wxEmptyString,
+        wxEmptyString,
+        wxEmptyString,
+        wxFileSelectorDefaultWildcardStr,
+        wxFD_SAVE,
+        this
+    );
+
+    // Check if user has set the file.
+    if (!filePath.empty()) {
+        // Insert file path to the input field.
+        SetOFPathValue(filePath);
+    }
 }
 
 void fc::Frame::DisableButtons() noexcept {

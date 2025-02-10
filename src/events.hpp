@@ -52,7 +52,7 @@ namespace fc {
 
         class UpdateDone : public wxEvent {
         public:
-            UpdateDone(const int newID = wxID_ANY);
+            UpdateDone(const int newID);
             UpdateDone(const UpdateDone& otherUpdateDone) = default;
             UpdateDone(UpdateDone&& otherUpdateDone) = default;
 
@@ -66,13 +66,12 @@ namespace fc {
             }
         };
 
-        // Declare this event (UpdateDone) for the wxWidgets.
         wxDECLARE_EVENT(EVT_UPDATE_DONE, UpdateDone);
 
         class UpdateProgress : public wxEvent {
         public:
             UpdateProgress() = delete;
-            UpdateProgress(const int newID = wxID_ANY, const int newProgress = 0);
+            UpdateProgress(const int newID, const int newProgress);
             UpdateProgress(const UpdateProgress& otherUpdateProgress) = default;
             UpdateProgress(UpdateProgress&& otherUpdateProgress) = default;
 
@@ -92,7 +91,6 @@ namespace fc {
             int progress;
         };
 
-        // Declare this event (UpdateProgress) for the wxWidgets.
         wxDECLARE_EVENT(EVT_UPDATE_PROGRESS, UpdateProgress);
     }
 }

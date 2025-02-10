@@ -30,11 +30,13 @@
 #include <thread>
 #include <wx/event.h>
 #include <wx/frame.h>
-#include <wx/sizer.h>
 #include <wx/string.h>
+#include <wx/timer.h>
 #include "button.hpp"
+#include "events.hpp"
 #include "field.hpp"
 #include "label.hpp"
+#include "progress.hpp"
 
 namespace fc {
     class Frame : public wxFrame {
@@ -49,6 +51,24 @@ namespace fc {
         ~Frame() noexcept override = default;
 
         void OnClose(wxCloseEvent& event) override;
+
+        void OnAbout(wxCommandEvent& event);
+        void OnCancel(wxCommandEvent& event);
+        void OnChoose(wxCommandEvent& event);
+        void OnDecrypt(wxCommandEvent& event);
+        void OnDoneUpdate(events::UpdateDone& event);
+        void OnEncrypt(wxCommandEvent& event);
+        void OnHelp(wxCommandEvent& event);
+        void OnProgressUpdate(events::UpdateProgress& event);
+        void OnReadyTimer(wxTimerEvent& event);
+        void OnSet(wxCommandEvent& event);
+    private:
+        std::unique_ptr<std::thread> taskThread;
+        std::array<Button*, 5> buttons;
+        std::array<Field*, 3> fields;
+        std::array<Label*, 3> labels;
+        std::unique_ptr<wxTimer> readyTimer;
+        ProgressBar* progressBar;
 
         inline wxString GetIFPathValue() const noexcept {
             return fields[0]->GetValue();
@@ -68,10 +88,6 @@ namespace fc {
 
         inline void SetOFPathValue(const wxString& newValue) noexcept {
             fields[1]->ChangeValue(newValue);
-        }
-
-        inline void ConnectTask(const std::shared_ptr<std::thread>& newTaskThread) {
-            taskThread = newTaskThread;
         }
 
         inline void DisableCancelButton() noexcept {
@@ -95,12 +111,6 @@ namespace fc {
         inline void EnableProgressBar() noexcept {
             progressBar->Enable();
         }
-    private:
-        std::array<Button*, 5> buttons;
-        std::array<Field*, 3> fields;
-        std::array<Label*, 3> labels;
-        std::shared_ptr<std::thread> taskThread;
-        ProgressBar* progressBar;
     };
 }
 

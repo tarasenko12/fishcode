@@ -25,16 +25,12 @@
 #ifndef FISHCODE_HPP
 #define FISHCODE_HPP
 
-#include <wx/aboutdlg.h>
 #include <wx/app.h>
-#include <wx/timer.h>
-#include "events.hpp"
-#include "frame.hpp"
 
 namespace fc {
     class FishCode : public wxApp {
     public:
-        FishCode();
+        FishCode() = default;
         FishCode(const FishCode& otherFishCode) = delete;
         FishCode(FishCode&& otherFishCode) = delete;
 
@@ -44,33 +40,6 @@ namespace fc {
         ~FishCode() noexcept override = default;
 
         bool OnInit() override;
-
-        void OnAbout(wxCommandEvent& event);
-        void OnCancel(wxCommandEvent& event);
-        void OnChoose(wxCommandEvent& event);
-        void OnDecrypt(wxCommandEvent& event);
-        void OnDoneUpdate(events::UpdateDone& event);
-        void OnEncrypt(wxCommandEvent& event);
-        void OnHelp(wxCommandEvent& event);
-        void OnReadyTimer(wxTimerEvent& event);
-        void OnSet(wxCommandEvent& event);
-    private:
-        wxAboutDialogInfo aboutDialogInfo;
-
-        Frame* frame;
-
-        inline void OnProgressUpdate(events::UpdateProgress& event) {
-            // Update progress value in the progress bar.
-            progressBar->SetValue(event.GetProgress());
-        }
-
-        inline void AbortTask() {
-            // Send a message to abort the task.
-            wxPostEvent(cancelButton, wxCommandEvent(wxEVT_BUTTON, events::ID_CANCEL));
-        }
-
-        void DisableControls();
-        void EnableControls();
     };
 }
 
