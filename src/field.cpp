@@ -22,36 +22,20 @@
 ** See <https://www.wxwidgets.org/about/licence/>.
 */
 
-#ifndef FISHCODE_FIELD_HPP
-#define FISHCODE_FIELD_HPP
-
+#include <wx/gdicmn.h>
+#include <wx/string.h>
 #include <wx/textctrl.h>
 #include <wx/window.h>
+#include "field.hpp"
+#include "password.hpp"
 
-namespace fc {
-    class Field : public wxTextCtrl {
-    public:
-        Field(wxWindow* parent);
-        Field(const Field& otherField) = delete;
-        Field(Field&& otherField) = delete;
+fc::Field::Field(wxWindow* parent)
+: wxTextCtrl(parent, wxID_ANY) {
 
-        Field& operator=(const Field& otherField) = delete;
-        Field& operator=(Field&& otherField) = delete;
-
-        ~Field() noexcept override = default;
-    };
-
-    class PasswordField : public wxTextCtrl {
-    public:
-        PasswordField(wxWindow* parent);
-        PasswordField(const PasswordField& otherPasswordField) = delete;
-        PasswordField(PasswordField&& otherPasswordField) = delete;
-
-        PasswordField& operator=(const PasswordField& otherPasswordField) = delete;
-        PasswordField& operator=(PasswordField&& otherPasswordField) = delete;
-
-        ~PasswordField() noexcept override = default;
-    };
 }
 
-#endif // FISHCODE_FIELD_HPP
+fc::PasswordField::PasswordField(wxWindow* parent)
+: wxTextCtrl(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD) {
+    // Set up size limit for the input string.
+    SetMaxLength(Password::SIZE);
+}

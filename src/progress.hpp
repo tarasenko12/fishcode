@@ -22,36 +22,24 @@
 ** See <https://www.wxwidgets.org/about/licence/>.
 */
 
-#ifndef FISHCODE_FIELD_HPP
-#define FISHCODE_FIELD_HPP
+#ifndef FISHCODE_PROGRESS_HPP
+#define FISHCODE_PROGRESS_HPP
 
-#include <wx/textctrl.h>
+#include <wx/gauge.h>
 #include <wx/window.h>
 
 namespace fc {
-    class Field : public wxTextCtrl {
+    class ProgressBar : public wxGauge {
     public:
-        Field(wxWindow* parent);
-        Field(const Field& otherField) = delete;
-        Field(Field&& otherField) = delete;
+        ProgressBar(wxWindow* parent);
+        ProgressBar(const ProgressBar& otherProgressBar) = delete;
+        ProgressBar(ProgressBar&& otherProgressBar) = delete;
 
-        Field& operator=(const Field& otherField) = delete;
-        Field& operator=(Field&& otherField) = delete;
+        ProgressBar& operator=(const ProgressBar& otherProgressBar) = delete;
+        ProgressBar& operator=(ProgressBar&& otherProgressBar) = delete;
 
-        ~Field() noexcept override = default;
-    };
-
-    class PasswordField : public wxTextCtrl {
-    public:
-        PasswordField(wxWindow* parent);
-        PasswordField(const PasswordField& otherPasswordField) = delete;
-        PasswordField(PasswordField&& otherPasswordField) = delete;
-
-        PasswordField& operator=(const PasswordField& otherPasswordField) = delete;
-        PasswordField& operator=(PasswordField&& otherPasswordField) = delete;
-
-        ~PasswordField() noexcept override = default;
+        ~ProgressBar() noexcept override = default;
     };
 }
 
-#endif // FISHCODE_FIELD_HPP
+#endif // FISHCODE_PROGRESS_HPP

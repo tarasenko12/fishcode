@@ -22,36 +22,25 @@
 ** See <https://www.wxwidgets.org/about/licence/>.
 */
 
-#ifndef FISHCODE_FIELD_HPP
-#define FISHCODE_FIELD_HPP
+#ifndef FISHCODE_LABEL_HPP
+#define FISHCODE_LABEL_HPP
 
-#include <wx/textctrl.h>
+#include <wx/stattext.h>
+#include <wx/string.h>
 #include <wx/window.h>
 
 namespace fc {
-    class Field : public wxTextCtrl {
+    class Label : public wxStaticText {
     public:
-        Field(wxWindow* parent);
-        Field(const Field& otherField) = delete;
-        Field(Field&& otherField) = delete;
+        Label(wxWindow* parent, const wxString& text);
+        Label(const Label& otherLabel) = delete;
+        Label(Label&& otherLabel) = delete;
 
-        Field& operator=(const Field& otherField) = delete;
-        Field& operator=(Field&& otherField) = delete;
+        Label& operator=(const Label& otherLabel) = delete;
+        Label& operator=(Label&& otherLabel) = delete;
 
-        ~Field() noexcept override = default;
-    };
-
-    class PasswordField : public wxTextCtrl {
-    public:
-        PasswordField(wxWindow* parent);
-        PasswordField(const PasswordField& otherPasswordField) = delete;
-        PasswordField(PasswordField&& otherPasswordField) = delete;
-
-        PasswordField& operator=(const PasswordField& otherPasswordField) = delete;
-        PasswordField& operator=(PasswordField&& otherPasswordField) = delete;
-
-        ~PasswordField() noexcept override = default;
+        ~Label() noexcept override = default;
     };
 }
 
-#endif // FISHCODE_FIELD_HPP
+#endif // FISHCODE_LABEL_HPP
