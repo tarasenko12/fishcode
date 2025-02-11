@@ -17,29 +17,31 @@
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef FISHCODE_PASSWORD_HPP
-#define FISHCODE_PASSWORD_HPP
+#ifndef FISHCODE_KEY_HPP
+#define FISHCODE_KEY_HPP
 
-#include <string>
+#include <array>
 #include <cstddef>
-#include "key.hpp"
+#include <cstdint>
+#include "block.hpp"
 
 namespace fc {
-    class Password : public Key {
+    class Key : public Block {
     public:
-        static constexpr const std::size_t MIN_LENGTH = 8;
-        static constexpr const std::size_t MAX_LENGTH = SIZE;
+        Key() = default;
+        Key(std::array<std::uint8_t, SIZE>&& newBytes);
+        Key(const Key& otherKey) = default;
+        Key(Key&& otherKey) noexcept = default;
 
-        Password() = default;
-        Password(const std::string& passwordString);
-        Password(const Password& otherPassword) = default;
-        Password(Password&& otherPassword) noexcept = default;
+        ~Key() noexcept override = default;
 
-        ~Password() noexcept override = default;
+        Key& operator=(const Key& otherKey) = default;
+        Key& operator=(Key&& otherKey) noexcept = default;
 
-        Password& operator=(const Password& otherPassword) = default;
-        Password& operator=(Password&& otherPassword) noexcept = default;
+        static Key Generate();
+
+        Key GetRoundKey(const int round) const;
     };
 }
 
-#endif // FISHCODE_PASSWORD_HPP
+#endif // FISHCODE_KEY_HPP

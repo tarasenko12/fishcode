@@ -25,44 +25,43 @@
 #include <cstdint>
 
 namespace fc {
+    class Key;
+
     class Block {
     public:
         static constexpr const std::size_t SIZE = 16;
 
-        Block();
+        Block() = default;
+        Block(std::array<std::uint8_t, SIZE>&& newBytes, const std::size_t newRealSize);
         Block(const Block& otherBlock) = default;
-        Block(Block&& otherBlock) = default;
+        Block(Block&& otherBlock) noexcept = default;
 
-        ~Block() noexcept = default;
+        virtual ~Block() noexcept = default;
 
         Block& operator=(const Block& otherBlock) = default;
-        Block& operator=(Block&& otherBlock) = default;
+        Block& operator=(Block&& otherBlock) noexcept = default;
 
-        static Block Generate();
-
-        inline std::uint8_t& operator[](const std::size_t index) noexcept {
-            // Call corresponding std::array overloaded operator.
-            return bytes[index];
-        }
-
-        inline const std::uint8_t& operator[](const std::size_t index) const noexcept {
-            // Call corresponding std::array overloaded operator.
-            return bytes[index];
+        inline std::array<std::uint8_t, SIZE> GetBytes() const {
+            return bytes;
         }
 
         inline std::size_t GetRealSize() const noexcept {
             return realSize;
         }
 
-        void Push(const std::uint8_t byte);
+        inline void SetBytes(std::array<uint8_t, SIZE>&& newBytes) noexcept {
+            bytes = newBytes;
+        }
 
-        void Decrypt(const Block& key) noexcept;
-        void Encrypt(const Block& key) noexcept;
+        inline void SetRealSize(const std::size_t newRealSize) noexcept {
+            realSize = newRealSize;
+        }
+
+        void Decrypt(const Key& key);
+        void Encrypt(const Key& key);
     private:
         std::array<std::uint8_t, SIZE> bytes;
-        std::size_t offset, realSize;
-
-        Block GetRoundVersion(const int round) const;
+        std::size_t realSize;
     };
 }
 

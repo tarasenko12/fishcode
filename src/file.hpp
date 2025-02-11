@@ -22,8 +22,9 @@
 
 #include <filesystem>
 #include <fstream>
-#include <cstddef>
+#include <ios>
 #include "block.hpp"
+#include "key.hpp"
 
 namespace fc {
     class File {
@@ -31,22 +32,25 @@ namespace fc {
         File() = default;
         File(const std::filesystem::path& fsPath);
         File(const std::filesystem::path& fsPath, const bool isEncrypted);
-        File(const File& anotherFile) = delete;
-        File(File&& anotherFile) = default;
+        File(const File& anotherFile) = default;
+        File(File&& anotherFile) = delete;
 
         ~File() noexcept = default;
 
-        File& operator=(const File& anotherFile) = delete;
-        File& operator=(File&& anotherFile) = default;
+        File& operator=(const File& anotherFile) = default;
+        File& operator=(File&& anotherFile) = delete;
 
-        inline std::size_t GetSize() const noexcept {
+        inline std::streamsize GetSize() const noexcept {
             return size;
         }
 
-        Block ReadBlock(const std::size_t bytesToRead = Block::SIZE);
+        Block ReadBlock(const std::streamsize bytesToRead = Block::SIZE);
+        Key ReadKey();
         void WriteBlock(const Block& block);
+        void WriteKey(const Key& key);
     private:
-        std::size_t offset, size;
+        std::streampos offset;
+        std::streamsize size;
         std::fstream stream;
     };
 }

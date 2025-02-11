@@ -17,29 +17,35 @@
 ** with FishCode. If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <array>
 #include <string>
 #include <cstddef>
 #include <cstdint>
 #include "password.hpp"
 
-using std::string;
-using std::size_t;
-using std::uint8_t;
-
-fc::Password::Password(const string& passwordString) {
+fc::Password::Password(const std::string& passwordString) {
     // Get length of the string (in bytes).
     const auto length = passwordString.length();
 
+    // Create storage for the new password bytes.
+    std::array<std::uint8_t, SIZE> newBytes;
+
     // Convert each symbol into its binary representation and store it.
-    for (const auto symbol : passwordString) {
-        Push(static_cast<uint8_t>(symbol));
+    for (std::size_t index = 0; index < length; index++) {
+        newBytes[index] = static_cast<std::uint8_t>(passwordString[index]);
     }
 
     // Check if password string doesn't have maximal length.
     if (length < SIZE) {
         // Append additional bytes from the beginning.
-        for (size_t counter = length, index = 0; counter < SIZE; counter++, index++) {
-            Push((*this)[index]);
+        for (std::size_t counter = length, index = 0; counter < SIZE; counter++, index++) {
+            newBytes[counter] = newBytes[index];
         }
     }
+
+    // Store new password bytes.
+    SetBytes(newBytes);
+
+    // Set up password size.
+    SetRealSize(SIZE);
 }
