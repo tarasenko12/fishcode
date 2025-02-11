@@ -42,6 +42,8 @@ add_executable(fishcode
     "src/fishcode.hpp"
     "src/frame.cpp"
     "src/frame.hpp"
+    "src/key.cpp"
+    "src/key.hpp"
     "src/label.cpp"
     "src/label.hpp"
     "src/password.cpp"
