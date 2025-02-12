@@ -30,8 +30,8 @@
 #include <utility>
 #include <cstddef>
 #include <wx/event.h>
-#include "block.hpp"
 #include "file.hpp"
+#include "key.hpp"
 #include "password.hpp"
 
 namespace fc {
@@ -40,13 +40,13 @@ namespace fc {
         friend void TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<Task>&& task);
     public:
         Task() = default;
-        Task(const Task& otherTask) = default;
-        Task(Task&& otherTask) = default;
+        Task(const Task& otherTask) = delete;
+        Task(Task&& otherTask) noexcept = default;
 
         ~Task() noexcept = default;
 
-        Task& operator=(const Task& otherTask) = default;
-        Task& operator=(Task&& otherTask) = default;
+        Task& operator=(const Task& otherTask) = delete;
+        Task& operator=(Task&& otherTask) noexcept = default;
 
         inline void SetInputFile(File&& newInputFile) {
             data.inputFile = std::move(newInputFile);
@@ -62,30 +62,30 @@ namespace fc {
     private:
         struct Data {
             File inputFile, outputFile;
-            Block key;
+            Key key;
             Password password;
 
             Data() = default;
-            Data(const Data& otherData) = default;
-            Data(Data&& otherData) = default;
+            Data(const Data& otherData) = delete;
+            Data(Data&& otherData) noexcept = default;
 
             ~Data() noexcept = default;
 
             Data& operator=(const Data& otherData) = default;
-            Data& operator=(Data&& otherData) = default;
+            Data& operator=(Data&& otherData) noexcept = default;
         } data;
 
         struct ProgressData {
             std::size_t current, total;
 
             ProgressData();
-            ProgressData(const ProgressData& otherProgressData) = default;
-            ProgressData(ProgressData&& otherProgressData) = default;
+            ProgressData(const ProgressData& otherProgressData) = delete;
+            ProgressData(ProgressData&& otherProgressData) noexcept = default;
 
             ~ProgressData() noexcept = default;
 
             ProgressData& operator=(const ProgressData& otherProgressData) = default;
-            ProgressData& operator=(ProgressData&& otherProgressData) = default;
+            ProgressData& operator=(ProgressData&& otherProgressData) noexcept = default;
         } progressData;
     };
 

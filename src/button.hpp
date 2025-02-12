@@ -28,16 +28,17 @@
 #include <wx/button.h>
 #include <wx/string.h>
 #include <wx/window.h>
+#include <wx/windowid.h>
 
 namespace fc {
     class Button : public wxButton {
     public:
-        Button(wxWindow* parent, const int id, const wxString& label);
+        Button(wxWindow* parent, const wxWindowID id, const wxString& label);
         Button(const Button& otherButton) = delete;
-        Button(Button&& otherButton) = delete;
+        Button(Button&& otherButton) noexcept = delete;
 
         Button& operator=(const Button& otherButton) = delete;
-        Button& operator=(Button&& otherButton) = delete;
+        Button& operator=(Button&& otherButton) noexcept = delete;
 
         ~Button() noexcept override = default;
     };

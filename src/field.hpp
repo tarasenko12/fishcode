@@ -25,30 +25,40 @@
 #ifndef FISHCODE_FIELD_HPP
 #define FISHCODE_FIELD_HPP
 
+#include <wx/gdicmn.h>
 #include <wx/textctrl.h>
 #include <wx/window.h>
+#include <wx/windowid.h>
 
 namespace fc {
     class Field : public wxTextCtrl {
     public:
         Field(wxWindow* parent);
+        Field(
+            wxWindow* parent,
+            const wxWindowID id,
+            const wxString& value,
+            const wxPoint& position,
+            const wxSize& size,
+            const long style
+        );
         Field(const Field& otherField) = delete;
-        Field(Field&& otherField) = delete;
+        Field(Field&& otherField) noexcept = delete;
 
         Field& operator=(const Field& otherField) = delete;
-        Field& operator=(Field&& otherField) = delete;
+        Field& operator=(Field&& otherField) noexcept = delete;
 
-        ~Field() noexcept override = default;
+        virtual ~Field() noexcept override = default;
     };
 
-    class PasswordField : public wxTextCtrl {
+    class PasswordField : public Field {
     public:
         PasswordField(wxWindow* parent);
         PasswordField(const PasswordField& otherPasswordField) = delete;
-        PasswordField(PasswordField&& otherPasswordField) = delete;
+        PasswordField(PasswordField&& otherPasswordField) noexcept = delete;
 
         PasswordField& operator=(const PasswordField& otherPasswordField) = delete;
-        PasswordField& operator=(PasswordField&& otherPasswordField) = delete;
+        PasswordField& operator=(PasswordField&& otherPasswordField) noexcept = delete;
 
         ~PasswordField() noexcept override = default;
     };

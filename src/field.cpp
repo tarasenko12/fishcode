@@ -26,6 +26,7 @@
 #include <wx/string.h>
 #include <wx/textctrl.h>
 #include <wx/window.h>
+#include <wx/windowid.h>
 #include "field.hpp"
 #include "password.hpp"
 
@@ -34,8 +35,19 @@ fc::Field::Field(wxWindow* parent)
 
 }
 
+fc::Field::Field(
+    wxWindow* parent,
+    const wxWindowID id,
+    const wxString& value,
+    const wxPoint& position,
+    const wxSize& size,
+    const long style
+) : wxTextCtrl(parent, id, value, position, size, style) {
+
+}
+
 fc::PasswordField::PasswordField(wxWindow* parent)
-: wxTextCtrl(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD) {
+: Field(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD) {
     // Set up size limit for the input string.
     SetMaxLength(Password::SIZE);
 }

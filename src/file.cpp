@@ -20,49 +20,41 @@
 #include <array>
 #include <filesystem>
 #include <ios>
+#include <utility>
 #include <cstddef>
 #include <cstdint>
 #include "block.hpp"
 #include "file.hpp"
 #include "key.hpp"
 
-fc::File::File(const std::filesystem::path& fsPath) {
-    // Open a file.
-    stream.open(fsPath, std::ios::out | std::ios::binary);
+fc::File::File(const std::filesystem::path& fsPath, const fc::FileType type) {
+    if (type == FileType::FT_INPUT) {
+        // Open a file.
+        stream.open(fsPath, std::ios::in | std::ios::binary | std::ios::ate);
 
-    // Now it is empty file.
-    size = 0;
+        // Calculate size of the file.
+        size = static_cast<std::streamsize>(stream.tellg());
 
-    // Configure offset.
-    offset = 0;
-}
+        // Rewind the stream.
+        stream.seekg(std::ios::beg);
+    } else {
+        // Create a file.
+        stream.open(fsPath, std::ios::out | std::ios::binary);
 
-fc::File::File(const std::filesystem::path& fsPath, const bool isEncrypted) {
-    // Open a file.
-    stream.open(fsPath, std::ios::in | std::ios::binary | std::ios::ate);
-
-    // Calculate size of the file.
-    size = static_cast<std::streamsize>(stream.tellg());
-
-    // Rewind the stream.
-    stream.seekg(std::ios::beg);
-
-    // Configure offset.
-    offset = 0;
+        // Now it is empty file.
+        size = 0;
+    }
 }
 
 fc::Block fc::File::ReadBlock(const std::streamsize bytesToRead) {
     // Create storage for the block (raw bytes).
-    std::array<std::uint8_t, static_cast<std::size_t>(bytesToRead)> bytes;
+    std::array<std::uint8_t, Block::SIZE> bytes;
 
     // Read block (raw bytes) from the file.
-    stream.read(bytes.data(), bytesToRead);
+    stream.read(reinterpret_cast<char*>(bytes.data()), bytesToRead);
 
-        // Update offset.
-    offset += static_cast<std::streampos>(bytesToRead);
-
-    // Create a real key object and return it.
-    return Block(bytes);
+    // Create a real block object and return it.
+    return Block(std::move(bytes), static_cast<std::size_t>(bytesToRead));
 }
 
 fc::Key fc::File::ReadKey() {
@@ -70,13 +62,10 @@ fc::Key fc::File::ReadKey() {
     std::array<std::uint8_t, Key::SIZE> bytes;
 
     // Read key (raw bytes) from the file.
-    stream.read(bytes.data(), static_cast<std::streamsize>(Key::SIZE));
-
-    // Update offset.
-    offset += static_cast<std::streampos>(Key::SIZE);
+    stream.read(reinterpret_cast<char*>(bytes.data()), static_cast<std::streamsize>(Key::SIZE));
 
     // Create a real key object and return it.
-    return Key(bytes);
+    return Key(std::move(bytes));
 }
 
 void fc::File::WriteBlock(const fc::Block& block) {
@@ -84,19 +73,13 @@ void fc::File::WriteBlock(const fc::Block& block) {
     const auto bytes = block.GetBytes();
 
     // Write these bytes to the file.
-    stream.write(bytes.data(), static_cast<std::streamsize>(block.GetRealSize()));
-
-    // Update offset.
-    offset += static_cast<std::streampos>(block.GetRealSize());
+    stream.write(reinterpret_cast<const char*>(bytes.data()), static_cast<std::streamsize>(block.GetRealSize()));
 }
 
 void fc::File::WriteKey(const fc::Key& key) {
     // Get a copy of the key bytes.
-    const auto bytes = block.GetBytes();
+    const auto bytes = key.GetBytes();
 
     // Write these bytes to the file.
-    stream.write(bytes.data(), static_cast<std::streamsize>(Key::SIZE));
-
-    // Update offset.
-    offset += static_cast<std::streampos>(Key::SIZE);
+    stream.write(reinterpret_cast<const char*>(bytes.data()), static_cast<std::streamsize>(Key::SIZE));
 }

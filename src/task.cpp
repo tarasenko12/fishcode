@@ -30,8 +30,6 @@
 #include "events.hpp"
 #include "task.hpp"
 
-using std::size_t;
-
 fc::Task::ProgressData::ProgressData() {
     // No progress for now.
     current = 0;
@@ -48,13 +46,13 @@ void fc::TaskDecrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task>&& task) {
     task->progressData.total = task->data.inputFile.GetSize() / Block::SIZE;
 
     // Read decryption (encrypted) key from the file.
-    task->data.key = task->data.inputFile.ReadBlock();
+    task->data.key = task->data.inputFile.ReadKey();
 
     // Decrypt the key using password.
     task->data.key.Decrypt(task->data.password);
 
     // Decrypt the input file by blocks.
-    for (size_t counter = 0; counter < task->progressData.total; counter++, task->progressData.current++) {
+    for (std::size_t counter = 0; counter < task->progressData.total; counter++, task->progressData.current++) {
         // Read one block from the file.
         auto block = task->data.inputFile.ReadBlock();
 
@@ -109,19 +107,19 @@ void fc::TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task>&& task) {
     task->progressData.total = task->data.inputFile.GetSize() / Block::SIZE;
 
     // Generate encryption key.
-    task->data.key = Block::Generate();
+    task->data.key = Key::Generate();
 
     // Encrypt the key.
     task->data.key.Encrypt(task->data.password);
 
     // Write key (encrypted) to the output file.
-    task->data.outputFile.WriteBlock(task->data.key);
+    task->data.outputFile.WriteKey(task->data.key);
 
     // Decrypt the key.
     task->data.key.Decrypt(task->data.password);
 
     // Encrypt the input file by blocks.
-    for (size_t counter = 0; counter < task->progressData.total; counter++, task->progressData.current++) {
+    for (std::size_t counter = 0; counter < task->progressData.total; counter++, task->progressData.current++) {
         // Read one block from the file.
         auto block = task->data.inputFile.ReadBlock();
 

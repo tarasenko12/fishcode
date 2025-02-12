@@ -31,12 +31,12 @@ namespace fc {
         public:
             InvalidFileIO() noexcept = default;
             InvalidFileIO(const InvalidFileIO& other) = default;
-            InvalidFileIO(InvalidFileIO&& other) = default;
+            InvalidFileIO(InvalidFileIO&& other) noexcept = default;
 
             ~InvalidFileIO() noexcept = default;
 
             InvalidFileIO& operator=(const InvalidFileIO& other) = default;
-            InvalidFileIO& operator=(InvalidFileIO&& other) = default;
+            InvalidFileIO& operator=(InvalidFileIO&& other) noexcept = default;
 
             const char* what() const noexcept override;
         };
@@ -45,12 +45,12 @@ namespace fc {
         public:
             InvalidInputFile() noexcept = default;
             InvalidInputFile(const InvalidInputFile& other) = default;
-            InvalidInputFile(InvalidInputFile&& other) = default;
+            InvalidInputFile(InvalidInputFile&& other) noexcept = default;
 
             ~InvalidInputFile() noexcept = default;
 
             InvalidInputFile& operator=(const InvalidInputFile& other) = default;
-            InvalidInputFile& operator=(InvalidInputFile&& other) = default;
+            InvalidInputFile& operator=(InvalidInputFile&& other) noexcept = default;
 
             const char* what() const noexcept override;
         };
@@ -59,12 +59,12 @@ namespace fc {
         public:
             InvalidOutputFile() noexcept = default;
             InvalidOutputFile(const InvalidOutputFile& other) = default;
-            InvalidOutputFile(InvalidOutputFile&& other) = default;
+            InvalidOutputFile(InvalidOutputFile&& other) noexcept = default;
 
             ~InvalidOutputFile() noexcept = default;
 
             InvalidOutputFile& operator=(const InvalidOutputFile& other) = default;
-            InvalidOutputFile& operator=(InvalidOutputFile&& other) = default;
+            InvalidOutputFile& operator=(InvalidOutputFile&& other) noexcept = default;
 
             const char* what() const noexcept override;
         };
@@ -73,12 +73,12 @@ namespace fc {
         public:
             InvalidPassword() noexcept = default;
             InvalidPassword(const InvalidPassword& other) = default;
-            InvalidPassword(InvalidPassword&& other) = default;
+            InvalidPassword(InvalidPassword&& other) noexcept = default;
 
             ~InvalidPassword() noexcept = default;
 
             InvalidPassword& operator=(const InvalidPassword& other) = default;
-            InvalidPassword& operator=(InvalidPassword&& other) = default;
+            InvalidPassword& operator=(InvalidPassword&& other) noexcept = default;
 
             const char* what() const noexcept override;
         };

@@ -19,12 +19,13 @@
 
 #include <array>
 #include <random>
+#include <utility>
 #include <cstddef>
 #include <cstdint>
 #include "key.hpp"
 
 fc::Key::Key(std::array<std::uint8_t, fc::Key::SIZE>&& newBytes)
-: fc::Block(newBytes, fc::Key::SIZE) {
+: fc::Block(std::move(newBytes), fc::Key::SIZE) {
 
 }
 
@@ -38,7 +39,7 @@ fc::Key fc::Key::Generate() {
     // Configure generator to produce numbers from 0 to UINT8_MAX.
     std::uniform_int_distribution<unsigned int> distribute(0, UINT8_MAX);
 
-    // Create storage for the generated key bytes.
+    // Create a storage for the generated key bytes.
     std::array<std::uint8_t, SIZE> generatedBytes;
 
     // Generate key by bytes.
@@ -48,7 +49,7 @@ fc::Key fc::Key::Generate() {
     }
 
     // Return generated key.
-    return Key(generatedBytes);
+    return Key(std::move(generatedBytes));
 }
 
 fc::Key fc::Key::GetRoundKey(const int round) const {
@@ -67,5 +68,5 @@ fc::Key fc::Key::GetRoundKey(const int round) const {
     }
 
     // Return new round key.
-    return Key(newBytes);
+    return Key(std::move(newBytes));
 }

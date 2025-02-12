@@ -25,9 +25,10 @@
 #include <wx/button.h>
 #include <wx/string.h>
 #include <wx/window.h>
+#include <wx/windowid.h>
 #include "button.hpp"
 
-fc::Button::Button(wxWindow* parent, const int id, const wxString& label)
+fc::Button::Button(wxWindow* parent, const wxWindowID id, const wxString& label)
 : wxButton(parent, id, label) {
 
 }

@@ -34,10 +34,10 @@ namespace fc {
     public:
         Label(wxWindow* parent, const wxString& text);
         Label(const Label& otherLabel) = delete;
-        Label(Label&& otherLabel) = delete;
+        Label(Label&& otherLabel) noexcept = delete;
 
         Label& operator=(const Label& otherLabel) = delete;
-        Label& operator=(Label&& otherLabel) = delete;
+        Label& operator=(Label&& otherLabel) noexcept = delete;
 
         ~Label() noexcept override = default;
     };

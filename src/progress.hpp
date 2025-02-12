@@ -33,10 +33,10 @@ namespace fc {
     public:
         ProgressBar(wxWindow* parent);
         ProgressBar(const ProgressBar& otherProgressBar) = delete;
-        ProgressBar(ProgressBar&& otherProgressBar) = delete;
+        ProgressBar(ProgressBar&& otherProgressBar) noexcept = delete;
 
         ProgressBar& operator=(const ProgressBar& otherProgressBar) = delete;
-        ProgressBar& operator=(ProgressBar&& otherProgressBar) = delete;
+        ProgressBar& operator=(ProgressBar&& otherProgressBar) noexcept = delete;
 
         ~ProgressBar() noexcept override = default;
     };

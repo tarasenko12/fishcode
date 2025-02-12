@@ -27,18 +27,22 @@
 #include "key.hpp"
 
 namespace fc {
+    enum class FileType {
+        FT_INPUT,
+        FT_OUTPUT
+    };
+
     class File {
     public:
         File() = default;
-        File(const std::filesystem::path& fsPath);
-        File(const std::filesystem::path& fsPath, const bool isEncrypted);
-        File(const File& anotherFile) = default;
-        File(File&& anotherFile) = delete;
+        File(const std::filesystem::path& fsPath, const FileType type);
+        File(const File& anotherFile) = delete;
+        File(File&& anotherFile) noexcept = default;
 
         ~File() noexcept = default;
 
-        File& operator=(const File& anotherFile) = default;
-        File& operator=(File&& anotherFile) = delete;
+        File& operator=(const File& anotherFile) = delete;
+        File& operator=(File&& anotherFile) noexcept = default;
 
         inline std::streamsize GetSize() const noexcept {
             return size;
@@ -49,7 +53,6 @@ namespace fc {
         void WriteBlock(const Block& block);
         void WriteKey(const Key& key);
     private:
-        std::streampos offset;
         std::streamsize size;
         std::fstream stream;
     };

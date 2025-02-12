@@ -43,18 +43,17 @@ namespace fc {
     public:
         Frame();
         Frame(const Frame& otherFrame) = delete;
-        Frame(Frame&& otherFrame) = delete;
+        Frame(Frame&& otherFrame) noexcept = delete;
 
         Frame& operator=(const Frame& otherFrame) = delete;
-        Frame& operator=(Frame&& otherFrame) = delete;
+        Frame& operator=(Frame&& otherFrame) noexcept = delete;
 
         ~Frame() noexcept override = default;
-
-        void OnClose(wxCloseEvent& event) override;
 
         void OnAbout(wxCommandEvent& event);
         void OnCancel(wxCommandEvent& event);
         void OnChoose(wxCommandEvent& event);
+        void OnClose(wxCloseEvent& event);
         void OnDecrypt(wxCommandEvent& event);
         void OnDoneUpdate(events::UpdateDone& event);
         void OnEncrypt(wxCommandEvent& event);

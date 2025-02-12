@@ -19,6 +19,7 @@
 
 #include <array>
 #include <string>
+#include <utility>
 #include <cstddef>
 #include <cstdint>
 #include "password.hpp"
@@ -44,7 +45,7 @@ fc::Password::Password(const std::string& passwordString) {
     }
 
     // Store new password bytes.
-    SetBytes(newBytes);
+    SetBytes(std::move(newBytes));
 
     // Set up password size.
     SetRealSize(SIZE);
