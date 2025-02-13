@@ -85,9 +85,9 @@ namespace fc {
     }
 
     void CheckFileIO(const std::filesystem::path& ifPath, const std::filesystem::path& ofPath);
-    File CheckInputFile(const std::filesystem::path& inputFilePath, const bool isEncrypted);
-    File CheckOutputFile(const std::filesystem::path& outputFilePath);
-    Password CheckPassword(const std::string& passwordString);
+    void CheckInputFile(const std::filesystem::path& inputFilePath, const bool isEncrypted);
+    void CheckOutputFile(const std::filesystem::path& outputFilePath);
+    void CheckPassword(const std::string& passwordString);
 }
 
 #endif // FISHCODE_ERROR_HPP

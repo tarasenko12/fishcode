@@ -41,7 +41,7 @@ fc::Task::ProgressData::ProgressData() {
 // Disable task abortion (default).
 std::atomic<bool> fc::taskShouldCancel(false);
 
-void fc::TaskDecrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task>&& task) {
+void fc::TaskDecrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task> task) {
     // Calculate total number of full blocks in the file.
     task->progressData.total = task->data.inputFile.GetSize() / Block::SIZE;
 
@@ -102,7 +102,7 @@ void fc::TaskDecrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task>&& task) {
     }
 }
 
-void fc::TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task>&& task) {
+void fc::TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task> task) {
     // Calculate total number of full blocks in the file.
     task->progressData.total = task->data.inputFile.GetSize() / Block::SIZE;
 

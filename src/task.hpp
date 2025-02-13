@@ -26,8 +26,8 @@
 #define FISHCODE_TASK_HPP
 
 #include <atomic>
+#include <filesystem>
 #include <memory>
-#include <utility>
 #include <cstddef>
 #include <wx/event.h>
 #include "file.hpp"
@@ -36,8 +36,8 @@
 
 namespace fc {
     class Task {
-        friend void TaskDecrypt(wxEvtHandler* sink, std::unique_ptr<Task>&& task);
-        friend void TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<Task>&& task);
+        friend void TaskDecrypt(wxEvtHandler* sink, std::unique_ptr<Task> task);
+        friend void TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<Task> task);
     public:
         Task() = default;
         Task(const Task& otherTask) = delete;
@@ -48,16 +48,16 @@ namespace fc {
         Task& operator=(const Task& otherTask) = delete;
         Task& operator=(Task&& otherTask) noexcept = default;
 
-        inline void SetInputFile(File&& newInputFile) {
-            data.inputFile = std::move(newInputFile);
+        inline void SetInputFile(const std::filesystem::path& ifPath) {
+            data.inputFile = File(ifPath, FileType::FT_INPUT);
         }
 
-        inline void SetOutputFile(File&& newOutputFile) {
-            data.outputFile = std::move(newOutputFile);
+        inline void SetOutputFile(const std::filesystem::path& ofPath) {
+            data.outputFile = File(ofPath, FileType::FT_OUTPUT);
         }
 
-        inline void SetPassword(const Password& newPassword) {
-            data.password = newPassword;
+        inline void SetPassword(const std::string& passwordString) {
+            data.password = Password(passwordString);
         }
     private:
         struct Data {
@@ -91,8 +91,8 @@ namespace fc {
 
     extern std::atomic<bool> taskShouldCancel;
 
-    void TaskDecrypt(wxEvtHandler* sink, std::unique_ptr<Task>&& task);
-    void TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<Task>&& task);
+    void TaskDecrypt(wxEvtHandler* sink, std::unique_ptr<Task> task);
+    void TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<Task> task);
 }
 
 #endif // FISHCODE_TASK_HPP
