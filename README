@@ -1,7 +1,7 @@
 ************************************************************************************************************************
 Brief description:
 ________________________________________________________________________________________________________________________
-    FishCode is a program for encrypting and decrypting files.
+    FishCode (fishcode) is a program for encrypting and decrypting files.
 ************************************************************************************************************************
 Detailed description:
 ________________________________________________________________________________________________________________________
@@ -36,15 +36,15 @@ TODO
 ************************************************************************************************************************
 User documentation:
 ________________________________________________________________________________________________________________________
-    Fishcode interface consists of two main components: the main window and an additional menu called "More...".
+    FishCode interface consists of two main components: the main window and an additional menu called "More...".
     The main window has three input fields ("Input file", "Output file", "Password") and five buttons ("Choose...",
 "Set...", "Encrypt", "Decrypt", "Cancel").
-    The "Input file" and "Output file" fields are for entering the path to the corresponding files on the disk.
+    "Input file" and "Output file" fields are for entering path to the corresponding files on the disk.
 The file path can be either absolute, such as "/home/user/Documents/file", or relative, such as "Documents/file".
-    The "Choose..." and "Set..." buttons are alternative ways to identify the relevant files. These buttons bring up
+    "Choose..." and "Set..." buttons are alternative ways to identify the relevant files. These buttons bring up
 the corresponding dialog boxes.
-    The "Encrypt" and "Decrypt" buttons perform the operations corresponding to their name. The status of the operation
-is displayed in the progress bar and at the bottom of the window, in the status field.
+    "Encrypt" and "Decrypt" buttons perform the operations corresponding to their name. Status of the operation is
+displayed in the progress bar and at the bottom of the window, in the status field.
     The "Cancel" button can abort encryption or decryption task.
-    Note: password cannot contain spaces and non-Latin letters and symbols that are not part of the ASCII character set.
+    Note: password cannot contain spaces, non-Latin letters and symbols that are not part of the ASCII character set.
 ========================================================================================================================
