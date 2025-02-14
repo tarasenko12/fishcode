@@ -21,6 +21,7 @@
 #define FISHCODE_BLOCK_HPP
 
 #include <array>
+#include <utility>
 #include <cstddef>
 #include <cstdint>
 
@@ -31,8 +32,8 @@ namespace fc {
     public:
         static constexpr const std::size_t SIZE = 16;
 
-        Block() = default;
-        Block(std::array<std::uint8_t, SIZE>&& newBytes, const std::size_t newRealSize);
+        Block();
+        Block(std::array<std::uint8_t, SIZE>&& newBytes, const std::size_t newRealSize) noexcept;
         Block(const Block& otherBlock) = default;
         Block(Block&& otherBlock) noexcept = default;
 
@@ -49,16 +50,16 @@ namespace fc {
             return realSize;
         }
 
+        void Decrypt(const Key& key);
+        void Encrypt(const Key& key);
+    protected:
         inline void SetBytes(std::array<uint8_t, SIZE>&& newBytes) noexcept {
-            bytes = newBytes;
+            bytes = std::move(newBytes);
         }
 
         inline void SetRealSize(const std::size_t newRealSize) noexcept {
             realSize = newRealSize;
         }
-
-        void Decrypt(const Key& key);
-        void Encrypt(const Key& key);
     private:
         std::array<std::uint8_t, SIZE> bytes;
         std::size_t realSize;

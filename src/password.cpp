@@ -47,6 +47,6 @@ fc::Password::Password(const std::string& passwordString) {
     // Store new password bytes.
     SetBytes(std::move(newBytes));
 
-    // Set up password size.
+    // Configure real size of the block.
     SetRealSize(SIZE);
 }

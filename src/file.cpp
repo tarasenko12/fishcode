@@ -27,6 +27,14 @@
 #include "file.hpp"
 #include "key.hpp"
 
+fc::File::File() {
+    // Now its file stream is not valid (no real file).
+    stream.setstate(std::ios::badbit | std::ios::eofbit);
+
+    // Now it is empty file.
+    size = 0;
+}
+
 fc::File::File(const std::filesystem::path& fsPath, const fc::FileType type) {
     if (type == FileType::FT_INPUT) {
         // Open a file.
@@ -74,6 +82,9 @@ void fc::File::WriteBlock(const fc::Block& block) {
 
     // Write these bytes to the file.
     stream.write(reinterpret_cast<const char*>(bytes.data()), static_cast<std::streamsize>(block.GetRealSize()));
+
+    // Update file size.
+    size += static_cast<std::streamsize>(block.GetRealSize());
 }
 
 void fc::File::WriteKey(const fc::Key& key) {
@@ -82,4 +93,7 @@ void fc::File::WriteKey(const fc::Key& key) {
 
     // Write these bytes to the file.
     stream.write(reinterpret_cast<const char*>(bytes.data()), static_cast<std::streamsize>(Key::SIZE));
+
+    // Update file size.
+    size += static_cast<std::streamsize>(Key::SIZE);
 }

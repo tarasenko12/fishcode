@@ -29,11 +29,11 @@ namespace fc {
     class Key : public Block {
     public:
         Key() = default;
-        Key(std::array<std::uint8_t, SIZE>&& newBytes);
+        Key(std::array<std::uint8_t, SIZE>&& newBytes) noexcept;
         Key(const Key& otherKey) = default;
         Key(Key&& otherKey) noexcept = default;
 
-        ~Key() noexcept override = default;
+        virtual ~Key() noexcept override = default;
 
         Key& operator=(const Key& otherKey) = default;
         Key& operator=(Key&& otherKey) noexcept = default;

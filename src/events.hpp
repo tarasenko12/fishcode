@@ -55,10 +55,10 @@ namespace fc {
         public:
             UpdateDone(const int newID);
             UpdateDone(const UpdateDone& otherUpdateDone) = default;
-            UpdateDone(UpdateDone&& otherUpdateDone) = default;
+            UpdateDone(UpdateDone&& otherUpdateDone) noexcept = default;
 
             UpdateDone& operator=(const UpdateDone& otherUpdateDone) = default;
-            UpdateDone& operator=(UpdateDone&& otherUpdateDone) = default;
+            UpdateDone& operator=(UpdateDone&& otherUpdateDone) noexcept = default;
 
             ~UpdateDone() noexcept override = default;
 
@@ -71,13 +71,12 @@ namespace fc {
 
         class UpdateProgress : public wxEvent {
         public:
-            UpdateProgress() = delete;
             UpdateProgress(const int newID, const int newProgress);
             UpdateProgress(const UpdateProgress& otherUpdateProgress) = default;
-            UpdateProgress(UpdateProgress&& otherUpdateProgress) = default;
+            UpdateProgress(UpdateProgress&& otherUpdateProgress) noexcept = default;
 
             UpdateProgress& operator=(const UpdateProgress& otherUpdateProgress) = default;
-            UpdateProgress& operator=(UpdateProgress&& otherUpdateProgress) = default;
+            UpdateProgress& operator=(UpdateProgress&& otherUpdateProgress) noexcept = default;
 
             ~UpdateProgress() noexcept override = default;
 

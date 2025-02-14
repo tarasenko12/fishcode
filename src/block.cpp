@@ -18,14 +18,23 @@
 */
 
 #include <array>
+#include <utility>
 #include <cstddef>
 #include <cstdint>
 #include "block.hpp"
 #include "key.hpp"
 
-fc::Block::Block(std::array<std::uint8_t, fc::Block::SIZE>&& newBytes, const std::size_t newRealSize) {
+fc::Block::Block() {
+    // Initialize block bytes with zeros.
+    bytes.fill(0);
+
+    // Now it is empty block.
+    realSize = 0;
+}
+
+fc::Block::Block(std::array<std::uint8_t, fc::Block::SIZE>&& newBytes, const std::size_t newRealSize) noexcept {
     // Initialize block bytes.
-    bytes = newBytes;
+    bytes = std::move(newBytes);
 
     // Store real size of the block.
     realSize = newRealSize;
@@ -63,7 +72,7 @@ void fc::Block::Decrypt(const fc::Key& key) {
         const auto roundKey = key.GetRoundKey(round);
 
         // Step 2: xor key.
-        for (std::size_t index = 0, size = bytes.size(); index < size; index++) {
+        for (std::size_t index = 0; index < realSize; index++) {
             bytes[index] ^= roundKey.bytes[index];
         }
 

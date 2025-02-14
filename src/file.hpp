@@ -34,7 +34,7 @@ namespace fc {
 
     class File {
     public:
-        File() = default;
+        File();
         File(const std::filesystem::path& fsPath, const FileType type);
         File(const File& anotherFile) = delete;
         File(File&& anotherFile) noexcept = default;

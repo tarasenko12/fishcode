@@ -296,10 +296,8 @@ void fc::Frame::OnDoneUpdate(fc::events::UpdateDone& event) {
     // Disable "Cancel" button.
     DisableCancelButton();
 
-    // Set new value in the progress bar (100%) if it is not already set.
-    if (progressBar->GetValue() != 100) {
-        progressBar->SetValue(100);
-    }
+    // Set new value in the progress bar (100%).
+    progressBar->SetValue(100);
 
     // Set new status in the status bar.
     SetStatusText(STR_STATUS1);

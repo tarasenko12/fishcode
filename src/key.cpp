@@ -24,7 +24,7 @@
 #include <cstdint>
 #include "key.hpp"
 
-fc::Key::Key(std::array<std::uint8_t, fc::Key::SIZE>&& newBytes)
+fc::Key::Key(std::array<std::uint8_t, fc::Key::SIZE>&& newBytes) noexcept
 : fc::Block(std::move(newBytes), fc::Key::SIZE) {
 
 }
@@ -56,7 +56,7 @@ fc::Key fc::Key::GetRoundKey(const int round) const {
     // Get current key bytes.
     const auto currentBytes = GetBytes();
 
-    // Create storage for the new key bytes.
+    // Create a storage for the new key bytes.
     std::array<std::uint8_t, SIZE> newBytes;
 
     // Calculate a 'magic' number.

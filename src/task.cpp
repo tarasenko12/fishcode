@@ -28,6 +28,7 @@
 #include <wx/event.h>
 #include "block.hpp"
 #include "events.hpp"
+#include "key.hpp"
 #include "task.hpp"
 
 fc::Task::ProgressData::ProgressData() {
@@ -43,7 +44,7 @@ std::atomic<bool> fc::taskShouldCancel(false);
 
 void fc::TaskDecrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task> task) {
     // Calculate total number of full blocks in the file.
-    task->progressData.total = task->data.inputFile.GetSize() / Block::SIZE;
+    task->progressData.total = (task->data.inputFile.GetSize() - Key::SIZE) / Block::SIZE;
 
     // Read decryption (encrypted) key from the file.
     task->data.key = task->data.inputFile.ReadKey();
@@ -53,32 +54,32 @@ void fc::TaskDecrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task> task) {
 
     // Decrypt the input file by blocks.
     for (std::size_t counter = 0; counter < task->progressData.total; counter++, task->progressData.current++) {
-        // Read one block from the file.
-        auto block = task->data.inputFile.ReadBlock();
-
-        // Decrypt the block.
-        block.Decrypt(task->data.key);
-
-        // Store block to the output file.
-        task->data.outputFile.WriteBlock(block);
-
         // Check for task abortion.
-        if (taskShouldCancel) {
-            // Stop the loop.
-            break;
-        } else {
+        if (!taskShouldCancel) {
+            // Read one block from the file.
+            auto block = task->data.inputFile.ReadBlock();
+
+            // Decrypt the block.
+            block.Decrypt(task->data.key);
+
+            // Store block to the output file.
+            task->data.outputFile.WriteBlock(block);
+
             // Notify the main thread about UI update.
             wxPostEvent(sink, events::UpdateProgress(
                 fc::events::ID_PROGRESS,
                 task->progressData.current / task->progressData.total * 100)
             );
+        } else {
+            // Stop the loop.
+            break;
         }
     }
 
     // Check if file contains a partial block (realSize < SIZE).
-    if (task->data.inputFile.GetSize() % Block::SIZE != 0 && !taskShouldCancel) {
+    if ((task->data.inputFile.GetSize() - Key::SIZE) % Block::SIZE != 0 && !taskShouldCancel) {
         // Calculate block size.
-        const auto blockSize = task->data.inputFile.GetSize() % Block::SIZE;
+        const auto blockSize = (task->data.inputFile.GetSize() - Key::SIZE) % Block::SIZE;
 
         // Read block from the file.
         auto block = task->data.inputFile.ReadBlock(blockSize);
@@ -120,25 +121,25 @@ void fc::TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task> task) {
 
     // Encrypt the input file by blocks.
     for (std::size_t counter = 0; counter < task->progressData.total; counter++, task->progressData.current++) {
-        // Read one block from the file.
-        auto block = task->data.inputFile.ReadBlock();
-
-        // Encrypt the block.
-        block.Encrypt(task->data.key);
-
-        // Store block to the output file.
-        task->data.outputFile.WriteBlock(block);
-
         // Check for task abortion.
-        if (taskShouldCancel) {
-            // Stop the loop.
-            break;
-        } else {
+        if (!taskShouldCancel) {
+            // Read one block from the file.
+            auto block = task->data.inputFile.ReadBlock();
+
+            // Encrypt the block.
+            block.Encrypt(task->data.key);
+
+            // Store block to the output file.
+            task->data.outputFile.WriteBlock(block);
+
             // Notify the main thread about UI update.
             wxPostEvent(sink, events::UpdateProgress(
                 fc::events::ID_PROGRESS,
                 task->progressData.current / task->progressData.total * 100)
             );
+        } else {
+            // Stop the loop.
+            break;
         }
     }
 
