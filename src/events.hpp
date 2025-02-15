@@ -43,12 +43,11 @@ namespace fc {
 
         enum UpdateID {
             ID_DONE = ID_READY + 1,
-            ID_PROGRESS,
-            ID_CLOSE
+            ID_PROGRESS
         };
 
         enum WindowID {
-            ID_FRAME = ID_CLOSE + 1
+            ID_FRAME = ID_PROGRESS + 1
         };
 
         class UpdateDone : public wxEvent {

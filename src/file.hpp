@@ -48,7 +48,7 @@ namespace fc {
             return size;
         }
 
-        Block ReadBlock(const std::streamsize bytesToRead = Block::SIZE);
+        Block ReadBlock(const std::streamsize bytesToRead);
         Key ReadKey();
         void WriteBlock(const Block& block);
         void WriteKey(const Key& key);

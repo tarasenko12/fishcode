@@ -46,54 +46,83 @@ void fc::TaskDecrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task> task) {
     // Calculate total number of full blocks in the file.
     task->progressData.total = (task->data.inputFile.GetSize() - Key::SIZE) / Block::SIZE;
 
-    // Read decryption (encrypted) key from the file.
+    // By default file doesn't contain partial block.
+    bool hasPartial = false;
+
+    // Check if there is a partial block.
+    if ((task->data.inputFile.GetSize() - Key::SIZE) % Block::SIZE != 0) {
+        // Yes, there is a partial block.
+        hasPartial = true;
+
+        // Update target progress to count the partial block.
+        task->progressData.total++;
+    }
+
+    // Read encryption key from the input file.
     task->data.key = task->data.inputFile.ReadKey();
 
-    // Decrypt the key using password.
+    // Check for task abortion.
+    if (taskShouldCancel) {
+        // Terminate the thread.
+        return;
+    }
+
+    // Decrypt the key.
     task->data.key.Decrypt(task->data.password);
 
     // Decrypt the input file by blocks.
-    for (std::size_t counter = 0; counter < task->progressData.total; counter++, task->progressData.current++) {
+    while (task->progressData.current < task->progressData.total) {
         // Check for task abortion.
-        if (!taskShouldCancel) {
-            // Read one block from the file.
-            auto block = task->data.inputFile.ReadBlock();
-
-            // Decrypt the block.
-            block.Decrypt(task->data.key);
-
-            // Store block to the output file.
-            task->data.outputFile.WriteBlock(block);
-
-            // Notify the main thread about UI update.
-            wxPostEvent(sink, events::UpdateProgress(
-                fc::events::ID_PROGRESS,
-                task->progressData.current / task->progressData.total * 100)
-            );
-        } else {
-            // Stop the loop.
-            break;
+        if (taskShouldCancel) {
+            // Terminate the thread.
+            return;
         }
-    }
 
-    // Check if file contains a partial block (realSize < SIZE).
-    if ((task->data.inputFile.GetSize() - Key::SIZE) % Block::SIZE != 0 && !taskShouldCancel) {
-        // Calculate block size.
-        const auto blockSize = (task->data.inputFile.GetSize() - Key::SIZE) % Block::SIZE;
+        // Set block size to default value.
+        auto blockSize = Block::SIZE;
 
-        // Read block from the file.
+        // Check if it is not a partial block.
+        if (hasPartial && task->progressData.current == task->progressData.total - 1) {
+            // Calculate size of the partial block.
+            blockSize = (task->data.inputFile.GetSize() - Key::SIZE) % Block::SIZE;
+        }
+
+        // Read one block from the file.
         auto block = task->data.inputFile.ReadBlock(blockSize);
+
+        // Check for task abortion.
+        if (taskShouldCancel) {
+            // Terminate the thread.
+            return;
+        }
 
         // Decrypt the block.
         block.Decrypt(task->data.key);
 
+        // Check for task abortion.
+        if (taskShouldCancel) {
+            // Terminate the thread.
+            return;
+        }
+
         // Store block to the output file.
         task->data.outputFile.WriteBlock(block);
 
-        // Set progress to 100%, if it is not already set.
-        if (task->progressData.current == 0) {
-            // Notify the main thread about UI update.
-            wxPostEvent(sink, events::UpdateProgress(fc::events::ID_PROGRESS, 100));
+        // Check for task abortion.
+        if (taskShouldCancel) {
+            // Terminate the thread.
+            return;
+        }
+
+        // Update current progress.
+        task->progressData.current++;
+
+        // Send a message about progress update (if it isn't the last block).
+        if (task->progressData.current < task->progressData.total) {
+            wxPostEvent(sink, events::UpdateProgress(
+                fc::events::ID_PROGRESS,
+                (task->progressData.current * 100) / task->progressData.total)
+            );
         }
     }
 
@@ -107,60 +136,101 @@ void fc::TaskEncrypt(wxEvtHandler* sink, std::unique_ptr<fc::Task> task) {
     // Calculate total number of full blocks in the file.
     task->progressData.total = task->data.inputFile.GetSize() / Block::SIZE;
 
+    // By default file doesn't contain partial block.
+    bool hasPartial = false;
+
+    // Check if there is a partial block.
+    if (task->data.inputFile.GetSize() % Block::SIZE != 0) {
+        // Yes, there is a partial block.
+        hasPartial = true;
+
+        // Update target progress to count the partial block.
+        task->progressData.total++;
+    }
+
     // Generate encryption key.
     task->data.key = Key::Generate();
+
+    // Check for task abortion.
+    if (taskShouldCancel) {
+        // Terminate the thread.
+        return;
+    }
 
     // Encrypt the key.
     task->data.key.Encrypt(task->data.password);
 
+    // Check for task abortion.
+    if (taskShouldCancel) {
+        // Terminate the thread.
+        return;
+    }
+
     // Write key (encrypted) to the output file.
     task->data.outputFile.WriteKey(task->data.key);
+
+    // Check for task abortion.
+    if (taskShouldCancel) {
+        // Terminate the thread.
+        return;
+    }
 
     // Decrypt the key.
     task->data.key.Decrypt(task->data.password);
 
     // Encrypt the input file by blocks.
-    for (std::size_t counter = 0; counter < task->progressData.total; counter++, task->progressData.current++) {
+    while (task->progressData.current < task->progressData.total) {
         // Check for task abortion.
-        if (!taskShouldCancel) {
-            // Read one block from the file.
-            auto block = task->data.inputFile.ReadBlock();
-
-            // Encrypt the block.
-            block.Encrypt(task->data.key);
-
-            // Store block to the output file.
-            task->data.outputFile.WriteBlock(block);
-
-            // Notify the main thread about UI update.
-            wxPostEvent(sink, events::UpdateProgress(
-                fc::events::ID_PROGRESS,
-                task->progressData.current / task->progressData.total * 100)
-            );
-        } else {
-            // Stop the loop.
-            break;
+        if (taskShouldCancel) {
+            // Terminate the thread.
+            return;
         }
-    }
 
-    // Check if file contains a partial block (realSize < SIZE).
-    if (task->data.inputFile.GetSize() % Block::SIZE != 0 && !taskShouldCancel) {
-        // Calculate block size.
-        const auto blockSize = task->data.inputFile.GetSize() % Block::SIZE;
+        // Set block size to default value.
+        auto blockSize = Block::SIZE;
 
-        // Read block from the file.
+        // Check if it is not a partial block.
+        if (hasPartial && task->progressData.current == task->progressData.total - 1) {
+            // Calculate size of the partial block.
+            blockSize = task->data.inputFile.GetSize() % Block::SIZE;
+        }
+
+        // Read one block from the file.
         auto block = task->data.inputFile.ReadBlock(blockSize);
+
+        // Check for task abortion.
+        if (taskShouldCancel) {
+            // Terminate the thread.
+            return;
+        }
 
         // Encrypt the block.
         block.Encrypt(task->data.key);
 
+        // Check for task abortion.
+        if (taskShouldCancel) {
+            // Terminate the thread.
+            return;
+        }
+
         // Store block to the output file.
         task->data.outputFile.WriteBlock(block);
 
-        // Set progress to 100%, if it is not already set.
-        if (task->progressData.current == 0) {
-            // Notify the main thread about UI update.
-            wxPostEvent(sink, events::UpdateProgress(fc::events::ID_PROGRESS, 100));
+        // Check for task abortion.
+        if (taskShouldCancel) {
+            // Terminate the thread.
+            return;
+        }
+
+        // Update current progress.
+        task->progressData.current++;
+
+        // Send a message about progress update (if it isn't the last block).
+        if (task->progressData.current < task->progressData.total) {
+            wxPostEvent(sink, events::UpdateProgress(
+                fc::events::ID_PROGRESS,
+                (task->progressData.current * 100) / task->progressData.total)
+            );
         }
     }
 
