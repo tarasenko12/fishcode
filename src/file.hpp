@@ -35,7 +35,7 @@ namespace fc {
     class File {
     public:
         File();
-        File(const std::filesystem::path& fsPath, const FileType type);
+        File(const std::filesystem::path& newFSPath, const FileType type);
         File(const File& anotherFile) = delete;
         File(File&& anotherFile) noexcept = default;
 
@@ -50,9 +50,16 @@ namespace fc {
 
         Block ReadBlock(const std::streamsize bytesToRead);
         Key ReadKey();
+
+        inline void Remove() {
+            // Remove this file using filesystem path.
+            std::filesystem::remove(fsPath);
+        }
+
         void WriteBlock(const Block& block);
         void WriteKey(const Key& key);
     private:
+        std::filesystem::path fsPath;
         std::streamsize size;
         std::fstream stream;
     };

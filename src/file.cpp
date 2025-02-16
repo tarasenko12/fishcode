@@ -35,10 +35,11 @@ fc::File::File() {
     size = 0;
 }
 
-fc::File::File(const std::filesystem::path& fsPath, const fc::FileType type) {
+fc::File::File(const std::filesystem::path& newFSPath, const fc::FileType type)
+: fsPath(newFSPath) {
     if (type == FileType::FT_INPUT) {
         // Open a file.
-        stream.open(fsPath, std::ios::in | std::ios::binary | std::ios::ate);
+        stream.open(newFSPath, std::ios::in | std::ios::binary | std::ios::ate);
 
         // Calculate size of the file.
         size = static_cast<std::streamsize>(stream.tellg());
@@ -47,7 +48,7 @@ fc::File::File(const std::filesystem::path& fsPath, const fc::FileType type) {
         stream.seekg(std::ios::beg);
     } else {
         // Create a file.
-        stream.open(fsPath, std::ios::out | std::ios::binary);
+        stream.open(newFSPath, std::ios::out | std::ios::binary);
 
         // Now it is empty file.
         size = 0;

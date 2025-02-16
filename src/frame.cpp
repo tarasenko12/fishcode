@@ -166,8 +166,11 @@ fc::Frame::Frame()
     Bind(wxEVT_TIMER, &fc::Frame::OnReadyTimer, this, events::ID_READY);
 
     // Set up status update handlers.
-    Bind(events::EVT_UPDATE_DONE, &fc::Frame::OnDoneUpdate, this, events::ID_DONE);
-    Bind(events::EVT_UPDATE_PROGRESS, &fc::Frame::OnProgressUpdate, this, events::ID_PROGRESS);
+    Bind(events::EVT_UPDATE_DONE, &fc::Frame::OnDoneUpdate, this, events::ID_FRAME);
+    Bind(events::EVT_UPDATE_PROGRESS, &fc::Frame::OnProgressUpdate, this, events::ID_FRAME);
+
+    // Configure worker thread exception handler.
+    Bind(events::EVT_TASK_EXCEPTION, &fc::Frame::OnTaskException, this, events::ID_FRAME);
 
     // Configure frame closing handler.
     Bind(wxEVT_CLOSE_WINDOW, &fc::Frame::OnClose, this, events::ID_FRAME);
@@ -292,6 +295,13 @@ void fc::Frame::OnDecrypt(wxCommandEvent& event) try {
 void fc::Frame::OnDoneUpdate(fc::events::UpdateDone& event) {
     // Disable "Cancel" button.
     DisableCancelButton();
+
+    // Join task thread to replace it in the future.
+    if (taskThread) {
+        if (taskThread->joinable()) {
+            taskThread->join();
+        }
+    }
 
     // Set new value in the progress bar (100%).
     progressBar->SetValue(100);

@@ -71,6 +71,12 @@ namespace fc {
         }
 
         void OnReadyTimer(wxTimerEvent& event);
+
+        inline void OnTaskException(events::TaskException& event){
+            // Display GUI error message.
+            wxMessageBox(event.What(), STR_CAPTION4, wxOK | wxCENTRE | wxICON_ERROR, this);
+        }
+
         void OnSet(wxCommandEvent& event);
     private:
         std::unique_ptr<std::thread> taskThread;
