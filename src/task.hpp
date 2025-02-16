@@ -49,14 +49,17 @@ namespace fc {
         Task& operator=(Task&& otherTask) noexcept = default;
 
         inline void SetInputFile(const std::filesystem::path& ifPath) {
+            // Open the file.
             data.inputFile = File(ifPath, FileType::FT_INPUT);
         }
 
         inline void SetOutputFile(const std::filesystem::path& ofPath) {
+            // Create a file.
             data.outputFile = File(ofPath, FileType::FT_OUTPUT);
         }
 
         inline void SetPassword(const std::string& passwordString) {
+            // Convert and copy password.
             data.password = Password(passwordString);
         }
     private:
@@ -71,7 +74,7 @@ namespace fc {
 
             ~Data() noexcept = default;
 
-            Data& operator=(const Data& otherData) = default;
+            Data& operator=(const Data& otherData) = delete;
             Data& operator=(Data&& otherData) noexcept = default;
         } data;
 
