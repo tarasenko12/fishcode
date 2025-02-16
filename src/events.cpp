@@ -22,8 +22,17 @@
 ** See <https://www.wxwidgets.org/about/licence/>.
 */
 
+#include <exception>
 #include <wx/event.h>
 #include "events.hpp"
+
+wxDEFINE_EVENT(fc::events::EVT_TASK_EXCEPTION, fc::events::TaskException);
+
+fc::events::TaskException::TaskException(const int newID, const std::exception& ex) noexcept
+: wxEvent(newID, fc::events::EVT_TASK_EXCEPTION) {
+    // Copy exception explanation string.
+    exWhat = ex.what();
+}
 
 wxDEFINE_EVENT(fc::events::EVT_UPDATE_DONE, fc::events::UpdateDone);
 

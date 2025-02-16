@@ -25,6 +25,8 @@
 #ifndef FISHCODE_EVENT_HPP
 #define FISHCODE_EVENT_HPP
 
+#include <exception>
+#include <string>
 #include <wx/event.h>
 
 namespace fc {
@@ -41,23 +43,43 @@ namespace fc {
             ID_READY = ID_SET + 1
         };
 
-        enum UpdateID {
-            ID_DONE = ID_READY + 1,
-            ID_PROGRESS
+        enum WindowID {
+            ID_FRAME = ID_READY + 1
         };
 
-        enum WindowID {
-            ID_FRAME = ID_PROGRESS + 1
+        class TaskException : public wxEvent {
+        public:
+            TaskException(const int newID, const std::exception& ex) noexcept;
+            TaskException(const TaskException& otherTaskException) noexcept = default;
+            TaskException(TaskException&& otherTaskException) noexcept = delete;
+
+            TaskException& operator=(const TaskException& otherTaskException) noexcept = default;
+            TaskException& operator=(TaskException&& otherTaskException) noexcept = delete;
+
+            ~TaskException() noexcept override = default;
+
+            inline wxEvent* Clone() const override {
+                return new TaskException(*this);
+            }
+
+            inline const char* What() const noexcept {
+                // Return C-style explanation string.
+                return exWhat.c_str();
+            }
+        private:
+            std::string exWhat;
         };
+
+        wxDECLARE_EVENT(EVT_TASK_EXCEPTION, TaskException);
 
         class UpdateDone : public wxEvent {
         public:
             UpdateDone(const int newID);
             UpdateDone(const UpdateDone& otherUpdateDone) = default;
-            UpdateDone(UpdateDone&& otherUpdateDone) noexcept = default;
+            UpdateDone(UpdateDone&& otherUpdateDone) noexcept = delete;
 
             UpdateDone& operator=(const UpdateDone& otherUpdateDone) = default;
-            UpdateDone& operator=(UpdateDone&& otherUpdateDone) noexcept = default;
+            UpdateDone& operator=(UpdateDone&& otherUpdateDone) noexcept = delete;
 
             ~UpdateDone() noexcept override = default;
 
@@ -72,10 +94,10 @@ namespace fc {
         public:
             UpdateProgress(const int newID, const int newProgress);
             UpdateProgress(const UpdateProgress& otherUpdateProgress) = default;
-            UpdateProgress(UpdateProgress&& otherUpdateProgress) noexcept = default;
+            UpdateProgress(UpdateProgress&& otherUpdateProgress) noexcept = delete;
 
             UpdateProgress& operator=(const UpdateProgress& otherUpdateProgress) = default;
-            UpdateProgress& operator=(UpdateProgress&& otherUpdateProgress) noexcept = default;
+            UpdateProgress& operator=(UpdateProgress&& otherUpdateProgress) noexcept = delete;
 
             ~UpdateProgress() noexcept override = default;
 
