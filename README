@@ -21,18 +21,49 @@ is derived from the main key.
     3. bytes swap (if the file contains 2 or more bytes of data).
     For encryption, the key is generated using a pseudo-random number generation algorithm. When encrypting a file,
 the user enters a password that can contain upper and lowercase Latin letters, special characters, numbers from 0 to 9.
-The password cannot contain spaces and non-Latin letters and symbols that are not part of the ASCII character set.
+The password cannot contain spaces, non-Latin letters and symbols that are not part of the ASCII character set.
 The password is used to encrypt and decrypt the key, because the key is written in the encrypted file (at the beginning
 of the file). When decrypting the master file, the key is decrypted using a password, which makes it impossible to
 accidentally guess the master key and decrypt the file without entering the password.
 ************************************************************************************************************************
 System requirements:
-________________________________________________________________________________________________________________________
-TODO
+================================================== Operating system ====================================================
+    A modern Linux distribution is required. Distributions released within the last 5 years (e.g., Ubuntu 20.04 or
+later, Debian 11 or later, Fedora 30 or later, etc.) are generally recommended. Older distributions might require
+building dependencies from source or may not be compatible.
+================================================== Language support ====================================================
+    Version 2.28 or later of the GNU C Library (glibc) is required. This is typically included with modern Linux
+distributions. You can check your glibc version by running "ldd --version" in the terminal. The GNU C++ Standard
+Library (libstdc++) compatible with C++20 is required. This typically comes with GCC 10 or later. If you are using a
+different compiler, ensure its associated C++ standard library version provides full C++20 support. wxWidgets (wxGTK)
+version 3.2 or later is required. The dynamic libraries (libwx_gtk3u_*.so) must be available on the system.
+Please, install the appropriate package for your distribution (e.g., libwxgtk3.2-dev or similar). Make sure the version
+you install matches the one used to compile the program. wxWidgets itself depends on various other libraries (e.g.,
+GTK, libpng, libjpeg, etc.). These will be pulled in as dependencies when you install the wxWidgets package using your
+distribution's package manager. You generally don't need to install these individually. An X11 server or Wayland
+compositor is needed for the GUI to function. This is standard on most desktop Linux systems.
+
 ************************************************************************************************************************
 Build instructions:
-________________________________________________________________________________________________________________________
-TODO
+==================================================== Requirements ======================================================
+    A C++20 compatible compiler such as GCC (g++ version 10 or later recommended) or Clang (clang++ version 10 or
+later recommended). CMake (version 3.20 or later recommended) is used for building the project. The development
+packages for wxWidgets (including headers and static libraries, e.g., libwxgtk3.2-dev) are essential. Standard build
+tools like GNU make are required. You can optionally install the Ninja build system (any version).
+====================================================== Commands ========================================================
+    For a normal build of the program, you need to enter the following commands in the terminal:
+        $ cmake -B build -D CMAKE_BUILD_TYPE=Release
+        or
+        $ cmake -B build -D CMAKE_BUILD_TYPE=Release -G Ninja
+        and
+        $ cmake --build build
+    If for some reason you need an executable file with debugging symbols, then instead of the commands above, enter:
+        $ cmake -B build -D CMAKE_BUILD_TYPE=Debug
+        or
+        $ cmake -B build -D CMAKE_BUILD_TYPE=Debug -G Ninja
+        and
+        $ cmake --build build
+    The resulting executable file named "fishcode" will be in the "build" directory.
 ************************************************************************************************************************
 User documentation:
 ________________________________________________________________________________________________________________________
