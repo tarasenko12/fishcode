@@ -59,6 +59,7 @@ namespace fc {
     constexpr const auto STR_NAME1 = "More...";
     constexpr const auto STR_NAME2 = "About";
     constexpr const auto STR_NAME3 = "Help";
+    constexpr const auto STR_PATTERN0 = "HOME";
     constexpr const auto STR_PROMPT0 = "Get more information about the program.";
     constexpr const auto STR_PROMPT1 = "Get user documentation.";
     constexpr const auto STR_STATUS0 = "Ready";

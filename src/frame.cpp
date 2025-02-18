@@ -27,6 +27,7 @@
 #include <memory>
 #include <thread>
 #include <utility>
+#include <cstdlib>
 #include <wx/aboutdlg.h>
 #include <wx/event.h>
 #include <wx/filedlg.h>
@@ -217,7 +218,7 @@ void fc::Frame::OnChoose(wxCommandEvent& event) {
     // Open file selector.
     const auto filePath = wxFileSelector(
         STR_CAPTION1,
-        wxEmptyString,
+        std::getenv(STR_PATTERN0),
         wxEmptyString,
         wxEmptyString,
         wxFileSelectorDefaultWildcardStr,
@@ -375,7 +376,7 @@ void fc::Frame::OnSet(wxCommandEvent& event) {
     // Open file selector.
     const auto filePath = wxFileSelector(
         STR_CAPTION2,
-        wxEmptyString,
+        std::getenv(STR_PATTERN0),
         wxEmptyString,
         wxEmptyString,
         wxFileSelectorDefaultWildcardStr,
