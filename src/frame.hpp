@@ -59,24 +59,10 @@ namespace fc {
         void OnDecrypt(wxCommandEvent& event);
         void OnDoneUpdate(events::UpdateDone& event);
         void OnEncrypt(wxCommandEvent& event);
-
-        inline void OnHelp(wxCommandEvent& event) {
-            // Display a message box with short documentation.
-            wxMessageBox(STR_DOCUMENTATION, STR_CAPTION0, wxOK | wxCENTRE | wxICON_QUESTION, this);
-        }
-
-        inline void OnProgressUpdate(events::UpdateProgress& event) {
-            // Set new value in the progress bar.
-            progressBar->SetValue(event.GetProgress());
-        }
-
+        void OnHelp(wxCommandEvent& event);
+        void OnProgressUpdate(events::UpdateProgress& event);
         void OnReadyTimer(wxTimerEvent& event);
-
-        inline void OnTaskException(events::TaskException& event){
-            // Display GUI error message.
-            wxMessageBox(event.What(), STR_CAPTION4, wxOK | wxCENTRE | wxICON_ERROR, this);
-        }
-
+        void OnTaskException(events::TaskException& event);
         void OnSet(wxCommandEvent& event);
     private:
         std::unique_ptr<std::thread> taskThread;

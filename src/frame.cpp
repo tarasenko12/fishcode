@@ -271,20 +271,20 @@ void fc::Frame::OnDecrypt(wxCommandEvent& event) try {
     CheckOutputFile(ofPath);
     CheckPassword(password);
 
-    // Allocate memory for the task.
-    auto task = std::make_unique<Task>();
+    // Allocate memory for the task data.
+    auto data = std::make_unique<TaskData>();
 
     // Open the input file.
-    task->SetInputFile(ifPath);
+    data->SetInputFile(ifPath);
 
     // Create an output file.
-    task->SetOutputFile(ofPath);
+    data->SetOutputFile(ofPath);
 
     // Store user password.
-    task->SetPassword(password);
+    data->SetPassword(password);
 
     // Create new thread for the decryption task.
-    taskThread = std::make_unique<std::thread>(TaskDecrypt, this, std::move(task));
+    taskThread = std::make_unique<std::thread>(TaskDecrypt, this, std::move(data));
 } catch (const std::exception& ex) {
     // Send a message about the task abortion.
     wxPostEvent(buttons[4], wxCommandEvent(wxEVT_BUTTON, events::ID_CANCEL));
@@ -309,6 +309,9 @@ void fc::Frame::OnDoneUpdate(fc::events::UpdateDone& event) {
 
     // Set new status in the status bar.
     SetStatusText(STR_STATUS1);
+
+    // Refresh the frame.
+    Refresh();
 
     // Start timer to the new status.
     readyTimer->StartOnce(3000);
@@ -337,26 +340,39 @@ void fc::Frame::OnEncrypt(wxCommandEvent& event) try {
     CheckOutputFile(ofPath);
     CheckPassword(password);
 
-    // Allocate memory for the task.
-    auto task = std::make_unique<Task>();
+    // Allocate memory for the task data.
+    auto data = std::make_unique<TaskData>();
 
     // Open the input file.
-    task->SetInputFile(ifPath);
+    data->SetInputFile(ifPath);
 
     // Create an output file.
-    task->SetOutputFile(ofPath);
+    data->SetOutputFile(ofPath);
 
     // Store user password.
-    task->SetPassword(password);
+    data->SetPassword(password);
 
     // Create new thread for the encryption task.
-    taskThread = std::make_unique<std::thread>(TaskEncrypt, this, std::move(task));
+    taskThread = std::make_unique<std::thread>(TaskEncrypt, this, std::move(data));
 } catch (const std::exception& ex) {
     // Send a message about the task abortion.
     wxPostEvent(buttons[4], wxCommandEvent(wxEVT_BUTTON, events::ID_CANCEL));
 
     // Display GUI error message.
     wxMessageBox(ex.what(), STR_CAPTION4, wxOK | wxCENTRE | wxICON_ERROR, this);
+}
+
+void fc::Frame::OnHelp(wxCommandEvent& event) {
+    // Display a message box with short documentation.
+    wxMessageBox(STR_DOCUMENTATION, STR_CAPTION0, wxOK | wxCENTRE | wxICON_QUESTION, this);
+}
+
+void fc::Frame::OnProgressUpdate(events::UpdateProgress& event) {
+    // Set new value in the progress bar.
+    progressBar->SetValue(event.GetProgress());
+
+    // Refresh the frame.
+    Refresh();
 }
 
 void fc::Frame::OnReadyTimer(wxTimerEvent& event) {
@@ -389,6 +405,11 @@ void fc::Frame::OnSet(wxCommandEvent& event) {
         // Insert file path to the input field.
         SetOFPathValue(filePath);
     }
+}
+
+void fc::Frame::OnTaskException(events::TaskException& event) {
+    // Display GUI error message.
+    wxMessageBox(event.What(), STR_CAPTION4, wxOK | wxCENTRE | wxICON_ERROR, this);
 }
 
 void fc::Frame::DisableButtons() noexcept {
